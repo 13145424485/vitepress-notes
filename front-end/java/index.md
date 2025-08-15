@@ -4,9 +4,8 @@
 
 ## 目录
 
-- [mybatis-plus](./mybatis-plus课件.pdf)
-- [spring](./spring课件.pdf)
-- [springboot](./Springboot2核心技术.pdf)
+- [初学后端](./初学后端.md)
+
 
 ## 三级标题
 
