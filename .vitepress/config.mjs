@@ -2,7 +2,8 @@ import { defineConfig } from 'vitepress'
 import { set_sidebar } from "./utils/auto_sidebar.mjs";	// 改成自己的路径
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  head: [["link", { rel: "icon", href: "/021-daisy.png" }]],
+  base: "/vitepress-notes/",
+  head: [["link", { rel: "icon", href: "/vitepress-notes/021-daisy.png" }]],
   title: "记忆中",
   description: "A VitePress Site",
   themeConfig: {
