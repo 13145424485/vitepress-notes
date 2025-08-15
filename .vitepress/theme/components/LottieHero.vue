@@ -26,7 +26,9 @@ onMounted(async () => {
 
     // 加载动画数据
     console.log('Loading hero animation data...')
-    const response = await fetch('/工作.json')
+    // 使用import.meta.env.BASE_URL来获取正确的base路径
+    const baseUrl = import.meta.env.BASE_URL || '/'
+    const response = await fetch(`${baseUrl}工作.json`)
     const animationData = await response.json()
     console.log('Hero animation data loaded:', animationData)
 
