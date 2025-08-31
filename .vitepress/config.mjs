@@ -21,7 +21,7 @@ export default defineConfig({
       { text: '通信', 
         items: [
           { text: '通信', link: '/' },
-          { text: '通信基础', link: '/markdown-examples' }
+          { text: '通信基础', link: '/communition/base/' }
         ],
        }
 
