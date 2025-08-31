@@ -18,7 +18,13 @@ export default defineConfig({
        },
       {text:'笔记',link:'/front-end/java/'},
       {text:'资料收藏',link:'/resources'},
-      { text: 'Examples', link: '/markdown-examples' }
+      { text: '通信', 
+        items: [
+          { text: '通信', link: '/' },
+          { text: '通信基础', link: '/markdown-examples' }
+        ],
+       }
+
     ],
 
     // sidebar: {
