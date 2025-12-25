@@ -15,25 +15,25 @@ hero:
 ---
 
 <div class="guide-grid">
-  <a class="guide-card" href="/front-end/java/初学后端">
+  <a class="guide-card" href="/front-end/java/初学后端.md">
     <p class="label">入门</p>
     <p class="title">初学后端</p>
     <p class="desc">环境、语言基础、常见坑点和练手示例，快速把开发跑起来。</p>
     <span class="cta">阅读 &rarr;</span>
   </a>
-  <a class="guide-card" href="/front-end/java/常见注释类">
+  <a class="guide-card" href="/front-end/java/常见注释类.md">
     <p class="label">速查</p>
     <p class="title">常见注释类</p>
     <p class="desc">整理常用注解与语法片段，复制即用。</p>
     <span class="cta">查看 &rarr;</span>
   </a>
-  <a class="guide-card" href="/front-end/java/常见类的使用">
+  <a class="guide-card" href="/front-end/java/常见类的使用.md">
     <p class="label">实践</p>
     <p class="title">常见类的使用</p>
     <p class="desc">集合、工具类、并发常用写法，带上手示例。</p>
     <span class="cta">进入 &rarr;</span>
   </a>
-  <a class="guide-card accent" href="/front-end/java/redis">
+  <a class="guide-card accent" href="/front-end/java/redis.md">
     <p class="label">专题</p>
     <p class="title">Redis</p>
     <p class="desc">缓存、分布式锁、秒杀场景的踩坑记录与解决方案。</p>
