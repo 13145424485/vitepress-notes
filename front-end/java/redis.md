@@ -866,13 +866,13 @@ public Result queryShopById(@PathVariable("id") Long id) {
 
 - 所以我们可以在客户端与数据库之间加上一个Redis缓存，先从Redis中查询，如果没有查到，再去MySQL中查询，同时查询完毕之后，将查询到的数据也存入Redis，这样当下一个用户来进行查询的时候，就可以直接从Redis中获取到数据
 
-![](C:\Users\youzi\Desktop\vitepress\image、\6354a19216f2c2beb1b095dd.jpg)
+![](/image、/6354a19216f2c2beb1b095dd.jpg)
 
 #### 缓存模型和思路
 
 - 标准的操作方式就是查询数据库之前先查询缓存，如果缓存数据存在，则直接从缓存中返回，如果缓存数据不存在，再查询数据库，然后将数据存入Redis。
 
-![](C:\Users\youzi\Desktop\vitepress\image、\6354a1aa16f2c2beb1b0aa83.jpg)
+![](/image、/6354a1aa16f2c2beb1b0aa83.jpg)
 
 #### 代码实现
 
@@ -1001,7 +1001,7 @@ ServiceImpl层
             String jsonstr = JSONUtil.toJsonStr(shopType);
             shopTypes.add(jsonstr);
         }
-        //.leftPushAll(key, values…) 是 Redis List 的批量左压入操作
+       //.leftPushAll(key, values...) 是 Redis List 的批量左压入操作
         //左压入会把参数按给定顺序依次“往左”插入，最终列表顺序与传入顺序相反；如果要保持原有顺序追加到尾部，用 rightPushAll.
         stringRedisTemplate.opsForList().leftPushAll(CACHE_SHOP_TYPE_KEY,shopTypes);
         //最终把查询到的商户分类信息返回给前端
@@ -1078,12 +1078,12 @@ public Result queryList() {
 - **1。先删除缓存，再操作数据库**
   删除缓存的操作很快，但是更新数据库的操作相对较慢，如果此时有一个线程2刚好进来查询缓存，由于我们刚刚才删除缓存，所以线程2需要查询数据库，并写入缓存，但是我们更新数据库的操作还未完成，所以线程2查询到的数据是脏数据，出现线程安全问题
 
-![](C:\Users\youzi\Desktop\vitepress\image、\6354be3e16f2c2beb1d11bd0.jpg)
+![](/image、/6354be3e16f2c2beb1d11bd0.jpg)
 
 **2.先操作数据库，再删除缓存**
 线程1在查询缓存的时候，缓存TTL刚好失效，需要查询数据库并写入缓存，这个操作耗时相对较短（相比较于上图来说），但是就在这么短的时间内，线程2进来了，更新数据库，删除缓存，但是线程1虽然查询完了数据（更新前的旧数据），但是还没来得及写入缓存，所以线程2的更新数据库与删除缓存，并没有影响到线程1的查询旧数据，写入缓存，造成线程安全问题
 
-![](C:\Users\youzi\Desktop\vitepress\image、\6354be5316f2c2beb1d130c0.jpg)
+![](/image、/6354be5316f2c2beb1d130c0.jpg)
 
 - 虽然这二者都存在线程安全问题，但是相对来说，后者出现线程安全问题的概率相对较低，所以我们最终采用后者`先操作数据库，再删除缓存`的方案
 
@@ -1178,7 +1178,7 @@ public Result update(Shop shop) {
 }
 ```
 
-修改完毕之后我们重启服务器进行测试，首先随便挑一个顺眼的数据，我这里就是拿餐厅数据做测试，，我们先访问该餐厅，将该餐厅的数据缓存到Redis中，之后使用POSTMAN发送PUT请求，请求路径http://localhost:8080/api/shop/ ，携带JSON数据如下
+修改完毕之后我们重启服务器进行测试，首先随便挑一个顺眼的数据，我这里就是拿餐厅数据做测试，，我们先访问该餐厅，将该餐厅的数据缓存到Redis中，之后使用POSTMAN发送PUT请求，请求路径 `http://localhost:8080/api/shop/` ，携带JSON数据如下
 
 ```
 {
@@ -1304,20 +1304,20 @@ public Result queryById(Long id) {
   2. 逻辑过期
 - `逻辑分析`：假设线程1在查询缓存之后未命中，本来应该去查询数据库，重建缓存数据，完成这些之后，其他线程也就能从缓存中加载这些数据了。但是在线程1还未执行完毕时，又进来了线程2、3、4同时来访问当前方法，那么这些线程都不能从缓存中查询到数据，那么他们就会在同一时刻访问数据库，执行SQL语句查询，对数据库访问压力过大
 
-![](C:\Users\youzi\Desktop\vitepress\image、\6354f77716f2c2beb1225032.jpg)
+![](/image、/6354f77716f2c2beb1225032.jpg)
 
 - `解决方案一`：互斥锁
 - 利用锁的互斥性，假设线程过来，只能一个人一个人的访问数据库，从而避免对数据库频繁访问产生过大压力，但这也会影响查询的性能，将查询的性能从并行变成了串行，我们可以采用tryLock方法+double check来解决这个问题
 - 线程1在操作的时候，拿着锁把房门锁上了，那么线程2、3、4就不能都进来操作数据库，只有1操作完了，把房门打开了，此时缓存数据也重建好了，线程2、3、4直接从redis中就可以查询到数据。
 
-![](C:\Users\youzi\Desktop\vitepress\image、\6354f76816f2c2beb1223b47.jpg)
+![](/image、/6354f76816f2c2beb1223b47.jpg)
 
 - `解决方案二`：逻辑过期方案
 - 方案分析：我们之所以会出现缓存击穿问题，主要原因是在于我们对key设置了TTL，如果我们不设置TTL，那么就不会有缓存击穿问题，但是不设置TTL，数据又会一直占用我们的内存，所以我们可以采用逻辑过期方案
 - 我们之前是TTL设置在redis的value中，注意：这个过期时间并不会直接作用于Redis，而是我们后续通过逻辑去处理。假设线程1去查询缓存，然后从value中判断当前数据已经过期了，此时线程1去获得互斥锁，那么其他线程会进行阻塞，获得了锁的进程他会开启一个新线程去进行之前的重建缓存数据的逻辑，直到新开的线程完成者逻辑之后，才会释放锁，而线程1直接进行返回，假设现在线程3过来访问，由于线程2拿着锁，所以线程3无法获得锁，线程3也直接返回数据（但只能返回旧数据，牺牲了数据一致性，换取性能上的提高），只有等待线程2重建缓存数据之后，其他线程才能返回正确的数据
 - 这种方案巧妙在于，异步构建缓存数据，缺点是在重建完缓存数据之前，返回的都是脏数据
 
-![](C:\Users\youzi\Desktop\vitepress\image、\6354f97716f2c2beb124e950.jpg)
+![](/image、/6354f97716f2c2beb124e950.jpg)
 
 可以这么想象：
 
@@ -1343,7 +1343,7 @@ public Result queryById(Long id) {
 - `核心思路`：相较于原来从缓存中查询不到数据后直接查询数据库而言，现在的方案是，进行查询之后，如果没有从缓存中查询到数据，则进行互斥锁的获取，获取互斥锁之后，判断是否获取到了锁，如果没获取到，则休眠一段时间，过一会儿再去尝试，知道获取到锁为止，才能进行查询
 - 如果获取到了锁的线程，则进行查询，将查询到的数据写入Redis，再释放锁，返回数据，利用互斥锁就能保证只有一个线程去执行数据库的逻辑，防止缓存击穿
 
-![](/6354fb8116f2c2beb127ac8b.jpg)
+![](/image、/6354fb8116f2c2beb127ac8b.jpg)
 
 - `操作锁的代码`
 - 核心思路就是利用redis的setnx方法来表示获取锁，如果redis没有这个key，则插入成功，返回1，如果已经存在这个key，则插入失败，返回0。在StringRedisTemplate中返回true/false，我们可以根据返回值来判断是否有线程成功获取到了锁
@@ -2272,7 +2272,7 @@ public void addSeckillVoucher(Voucher voucher) {
 - 我们点击限时抢购然后查看发送的请求
 
   ```
-  复制成功请求网址: http://localhost:8080/api/voucher-order/seckill/13
+  复制成功请求网址: `http://localhost:8080/api/voucher-order/seckill/13`
   请求方法: POST
   ```
 
@@ -2382,11 +2382,11 @@ public Result seckillVoucher(Long voucherId) {
 
 注意使用Jmeter进行压测时，需要携带我们登录的token
 
-![](/635a168316f2c2beb193f83d.jpg)
+![](/image、/635a168316f2c2beb193f83d.jpg)
 
 测试完毕之后，查看数据库中的订单表，我们明明只设置了100张优惠券，却有166条数据，去优惠券表查看，库存为-66，超卖了66张
 
-![](/635a16d316f2c2beb19443a7.jpg)
+![](/image、/635a16d316f2c2beb19443a7.jpg)
 
 那么如何解决这个问题呢？先来看看我们的代码中是怎么写的
 
@@ -2636,7 +2636,7 @@ public Result createVoucherOrder(Long voucherId) {
 
 - userId.toString().intern()：把当前用户的 id 转成字符串并放进字符串常量池，保证同一个用户拿到的是同一个锁对象；不同用户拿到的是不同的锁对象。
 
-- synchronized (…) { … }：进入同步块时，对该用户的锁对象加锁，同一用户的并发请求会串行执行下面的逻辑，避免两个线程同时通过校验。
+- synchronized (...) { ... }：进入同步块时，对该用户的锁对象加锁，同一用户的并发请求会串行执行下面的逻辑，避免两个线程同时通过校验。
 - 块内逻辑：query().eq("voucher_id", voucherId).eq("user_id", userId).count(); 查询当前用户是否已经买过这张券；若数量>0，则返回“已购买过一次”。
 
 toString() 会 new 出一个新的字符串对象，同一个用户每次拿到的不是同一把锁。intern() 会去字符串常量池找有没有内容相同的字符串，有就直接返回池里的那份，没有就把当前这份放进池里并返回。这样相同内容（同一用户的 id）总能拿到同一个字符串对象，用作锁时才能把同一用户的并发串行化。
@@ -2691,7 +2691,7 @@ public Result seckillVoucher(Long voucherId) {
 
   1. UserHolder.getUser().getId()
      - 从线程上下文里取出当前登录用户，拿到用户 id。很多项目用 ThreadLocal 存当前用户，这里就是这么取。
-  2. synchronized (userId.toString().intern()) { … }
+  2. synchronized (userId.toString().intern()) { ... }
      - 对“当前用户”加一把锁，目的是让同一用户的并发请求串行执行，避免一人下多单。
      - toString() 会生成新字符串，intern() 会把相同内容的字符串指向同一对象，这样相同用户拿到的锁对象相同，不同用户锁对象不同。
      - 这个锁只在单机内生效，多实例部署要用分布式锁（如 Redis 锁）才能跨实例互斥。
@@ -3082,3 +3082,62 @@ public interface ILock {
 - 那么就相当于判断标识那行代码没有起到作用
 - 这就是删锁时的原子性问题
 - 因为线程1的拿锁，判断标识，删锁，不是原子操作，所以我们要防止刚刚的情况
+
+### Lua脚本解决多条命令原子性问题
+
+- Redis提供了Lua脚本功能，在一个脚本中编写多条Redis命令，确保多条命令执行时的原子性。
+
+- Lua是一种编程语言，它的基本语法可以上菜鸟教程看看，链接：https://www.runoob.com/lua/lua-tutorial.html
+
+- 这里重点介绍Redis提供的调用函数，我们可以使用Lua去操作Redis，而且还能保证它的原子性，这样就可以实现`拿锁`，`判断标识`，`删锁`是一个原子性动作了
+
+- Redis提供的调用函数语法如下
+
+  ```
+  redis.call('命令名称','key','其他参数', ...)
+  ```
+
+- 例如我们要执行set name Kyle，则脚本是这样
+
+  ```
+  redis.call('set', 'name', 'Kyle')
+  ```
+
+- 例如我我们要执行set name David，在执行get name，则脚本如下
+
+  ```java
+  ## 先执行set name David
+  redis.call('set', 'name', 'David')
+  ## 再执行get name
+  local name = redis.call('get', 'name')
+  ## 返回
+  return name
+  ```
+
+- 写好脚本以后，需要用Redis命令来调用脚本，调用脚本的常见命令如下
+
+  ```
+  EVAL script numkeys key [key ...] arg [arg ...]
+  ```
+
+- 例如，我们要调用
+
+  ```java
+  redis.call('set', 'name', 'Kyle') 0
+  ```
+
+  这个脚本，语法如下
+
+  ```java
+  EVAL "return redis.call('set', 'name', 'Kyle')" 0
+  ```
+
+- 如果脚本中的key和value不想写死，可以作为参数传递，key类型参数会放入KEYS数组，其他参数会放入ARGV数组，在脚本中可以从KEYS和ARGV数组中获取这些参数
+
+  注意：在Lua中，数组下标从1开始
+
+  ```java
+  EVAL "return redis.call('set', KEYS[1], ARGV[1])" 1 name Lucy
+  ```
+
+- 那现在我们来使用Lua脚本来代替我们释放锁的逻辑
