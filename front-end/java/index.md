@@ -15,30 +15,30 @@ hero:
 ---
 
 <div class="guide-grid">
-  <div class="guide-card">
+  <a class="guide-card" href="/front-end/java/初学后端">
     <p class="label">入门</p>
-    <a class="title" href="/front-end/java/初学后端">初学后端</a>
+    <p class="title">初学后端</p>
     <p class="desc">环境、语言基础、常见坑点和练手示例，快速把开发跑起来。</p>
-    <a class="cta" href="/front-end/java/初学后端">阅读 &rarr;</a>
-  </div>
-  <div class="guide-card">
+    <span class="cta">阅读 &rarr;</span>
+  </a>
+  <a class="guide-card" href="/front-end/java/常见注释类">
     <p class="label">速查</p>
-    <a class="title" href="/front-end/java/常见注释类">常见注释类</a>
+    <p class="title">常见注释类</p>
     <p class="desc">整理常用注解与语法片段，复制即用。</p>
-    <a class="cta" href="/front-end/java/常见注释类">查看 &rarr;</a>
-  </div>
-  <div class="guide-card">
+    <span class="cta">查看 &rarr;</span>
+  </a>
+  <a class="guide-card" href="/front-end/java/常见类的使用">
     <p class="label">实践</p>
-    <a class="title" href="/front-end/java/常见类的使用">常见类的使用</a>
+    <p class="title">常见类的使用</p>
     <p class="desc">集合、工具类、并发常用写法，带上手示例。</p>
-    <a class="cta" href="/front-end/java/常见类的使用">进入 &rarr;</a>
-  </div>
-  <div class="guide-card accent">
+    <span class="cta">进入 &rarr;</span>
+  </a>
+  <a class="guide-card accent" href="/front-end/java/redis">
     <p class="label">专题</p>
-    <a class="title" href="/front-end/java/redis">Redis</a>
+    <p class="title">Redis</p>
     <p class="desc">缓存、分布式锁、秒杀场景的踩坑记录与解决方案。</p>
-    <a class="cta" href="/front-end/java/redis">快速跳转 &rarr;</a>
-  </div>
+    <span class="cta">快速跳转 &rarr;</span>
+  </a>
 </div>
 
 <style scoped>
@@ -49,6 +49,7 @@ hero:
   margin-top: 32px;
 }
 .guide-card {
+  display: block;
   position: relative;
   padding: 18px 20px;
   border-radius: 14px;
@@ -56,6 +57,8 @@ hero:
   border: 1px solid rgba(60, 60, 67, 0.08);
   box-shadow: 0 12px 32px -18px rgba(0, 0, 0, 0.2);
   transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+  text-decoration: none;
+  color: inherit;
 }
 .guide-card:hover {
   transform: translateY(-3px);
@@ -98,4 +101,3 @@ hero:
   text-decoration: underline;
 }
 </style>
-
