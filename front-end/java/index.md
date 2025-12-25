@@ -8,36 +8,36 @@ hero:
   actions:
     - theme: brand
       text: 从基础开始
-      link: ./初学后端.md
+      link: /front-end/java/初学后端
     - theme: alt
       text: Redis 速查
-      link: ./redis.md
+      link: /front-end/java/redis
 ---
 
 <div class="guide-grid">
   <div class="guide-card">
     <p class="label">入门</p>
-    <a class="title" href="./初学后端.md">初学后端</a>
+    <a class="title" href="/front-end/java/初学后端">初学后端</a>
     <p class="desc">环境、语言基础、常见坑点和练手示例，快速把开发跑起来。</p>
-    <a class="cta" href="./初学后端.md">阅读 &rarr;</a>
+    <a class="cta" href="/front-end/java/初学后端">阅读 &rarr;</a>
   </div>
   <div class="guide-card">
     <p class="label">速查</p>
-    <a class="title" href="./常见注释类.md">常见注释类</a>
+    <a class="title" href="/front-end/java/常见注释类">常见注释类</a>
     <p class="desc">整理常用注解与语法片段，复制即用。</p>
-    <a class="cta" href="./常见注释类.md">查看 &rarr;</a>
+    <a class="cta" href="/front-end/java/常见注释类">查看 &rarr;</a>
   </div>
   <div class="guide-card">
     <p class="label">实践</p>
-    <a class="title" href="./常见类的使用.md">常见类的使用</a>
+    <a class="title" href="/front-end/java/常见类的使用">常见类的使用</a>
     <p class="desc">集合、工具类、并发常用写法，带上手示例。</p>
-    <a class="cta" href="./常见类的使用.md">进入 &rarr;</a>
+    <a class="cta" href="/front-end/java/常见类的使用">进入 &rarr;</a>
   </div>
   <div class="guide-card accent">
     <p class="label">专题</p>
-    <a class="title" href="./redis.md">Redis</a>
+    <a class="title" href="/front-end/java/redis">Redis</a>
     <p class="desc">缓存、分布式锁、秒杀场景的踩坑记录与解决方案。</p>
-    <a class="cta" href="./redis.md">快速跳转 &rarr;</a>
+    <a class="cta" href="/front-end/java/redis">快速跳转 &rarr;</a>
   </div>
 </div>
 
@@ -98,5 +98,4 @@ hero:
   text-decoration: underline;
 }
 </style>
-
 

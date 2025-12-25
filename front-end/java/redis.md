@@ -3141,3 +3141,54 @@ public interface ILock {
   ```
 
 - 那现在我们来使用Lua脚本来代替我们释放锁的逻辑
+
+**原逻辑**
+
+```java
+@Override
+public void unlock() {
+    // 获取当前线程的标识
+    String threadId = ID_PREFIX + Thread.currentThread().getId();
+    // 获取锁中的标识
+    String id = stringRedisTemplate.opsForValue().get(KEY_PREFIX + name);
+    // 判断标识是否一致
+    if (threadId.equals(id)) {
+        // 释放锁
+        stringRedisTemplate.delete(KEY_PREFIX + name);
+    }
+}
+```
+
+**改写为Lua脚本01**
+
+但是现在是写死了的，我们可以通过传参的方式来变成动态的Lua脚本
+
+```java
+-- 线程标识
+local threadId = "UUID-31"
+-- 锁的key
+local key = "lock:order:userId"
+-- 获取锁中线程标识
+local id = redis.call('get', key)
+-- 比较线程标识与锁的标识是否一致
+if (threadId == id) then
+    -- 一致则释放锁 del key
+    return redis.call('del', key)
+end
+return 0
+```
+
+**改写为Lua脚本02**
+
+但是现在是写死了的，我们可以通过传参的方式来变成动态的Lua脚本
+
+```lua
+-- 这里的KEYS[1]就是传入锁的key
+-- 这里的ARGV[1]就是线程标识
+-- 比较锁中的线程标识与线程标识是否一致
+if (redis.call('get', KEYS[1]) == ARGV[1]) then
+    -- 一致则释放锁
+    return redis.call('del', KEYS[1])
+end
+return 0
+```
