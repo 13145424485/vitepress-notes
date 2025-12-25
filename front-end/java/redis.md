@@ -15,7 +15,7 @@ ThreadLoal 变量，线程局部变量，同一个 ThreadLocal 所包含的对�
 
 ## ThreadLocal与Synchronized的区别
 
-ThreadLocal<T>其实是与线程绑定的一个变量。ThreadLocal和Synchonized都用于解决多线程并发访问。
+`ThreadLocal<T>`其实是与线程绑定的一个变量。ThreadLocal和Synchonized都用于解决多线程并发访问。
 
 但是ThreadLocal与synchronized有本质的区别：
 
@@ -2180,7 +2180,7 @@ opsForValue() 是操作字符串/简单值的接口，常用的不止 increment�
 - append(key, text) 在末尾追加字符串。
 - decrement(key)/decrement(key, delta) 减 1 或减指定步长。
 - increment(key, delta) 支持 long/double。 是 Redis 的自增操作，给字符串值按数值加上指定增量
-- multiSet(Map<String,String>) / multiGet(Collection<String>) 批量写/读。
+- `multiSet(Map<String,String>)` / `multiGet(Collection<String>)` 批量写/读。
 - setBit(key, offset, true/false) / getBit(key, offset) 位图操作。
 
 ### 添加优惠券
