@@ -1,4 +1,4 @@
-# 一、关于项目的redis学习
+﻿# 一、关于项目的redis学习
 
 在Service类中创建对应方法之后，在Impl类中实现，我们查看用户探店笔记的时候，需要额外设置用户名和其头像，由于设置用户信息这个操作比较通用，所以这里封装成了一个方法
 
@@ -4117,7 +4117,7 @@ void method2() {
 
   请求路径：
 
-  http://localhost:8080/api/voucher/seckill
+  `http://localhost:8080/api/voucher/seckill`
 
   请求方式：POST
 
@@ -5248,7 +5248,7 @@ public Result uploadImage(@RequestParam("file") MultipartFile image) {
 
   - 随便点击一张图片，查看发送的请求
 
-    > 请求网址: http://localhost:8080/api/blog/6
+    > 请求网址: `http://localhost:8080/api/blog/6`
     > 请求方法: GET
 
   - 看样子是`BlogController`下的方法，请求方式为GET，那我们直接来编写对应的方法
@@ -5384,7 +5384,7 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
 
 - 点击点赞按钮，查看发送的请求
 
-  > 请求网址: http://localhost:8080/api/blog/like/4
+  > 请求网址: `http://localhost:8080/api/blog/like/4`
   > 请求方法: PUT
 
 - 看样子是BlogController中的like方法，源码如下
@@ -5563,7 +5563,7 @@ private void isBlogLiked(Blog blog) {
 
 - 那我们继续来完善显示点赞列表功能，查看浏览器请求，这个请求目前应该是404的，因为我们还没有写，他需要一个list返回值，显示top5点赞的用户
 
-  > 请求网址: http://localhost:8080/api/blog/likes/4
+  > 请求网址: `http://localhost:8080/api/blog/likes/4`
   > 请求方法: GET
 
 - 在Controller层中编写对应的方法，点赞查询列表，具体逻辑写到BlogServiceImpl中
@@ -5607,12 +5607,12 @@ private void isBlogLiked(Blog blog) {
 
 - 当我们进入到笔记详情页面时，会发送一个请求，判断当前登录用户是否关注了笔记博主
 
-  > 请求网址: http://localhost:8080/api/follow/or/not/2
+  > 请求网址: `http://localhost:8080/api/follow/or/not/2`
   > 请求方法: GET
 
 - 当我们点击关注按钮时，会发送一个请求，实现关注/取关
 
-  > 请求网址: http://localhost:8080/api/follow/2/true
+  > 请求网址: `http://localhost:8080/api/follow/2/true`
   > 请求方法: PUT
 
 - 关注是User之间的关系，是博主与粉丝的关系，数据库中有一张tb_follow表来标示
@@ -5735,12 +5735,12 @@ private void isBlogLiked(Blog blog) {
 
   - 查询用户信息
 
-    > 请求网址: http://localhost:8080/api/user/2
+    > 请求网址: `http://localhost:8080/api/user/2`
     > 请求方法: GET
 
   - 查看共同关注
 
-    > 请求网址: http://localhost:8080/api/follow/common/undefined
+    > 请求网址: `http://localhost:8080/api/follow/common/undefined`
     > 请求方法: GET
 
 - 编写`查询用户信息`方法
@@ -5762,7 +5762,7 @@ private void isBlogLiked(Blog blog) {
 
 - 重启服务器，现在可以看到用户信息，但是不能看到用户发布的笔记信息，查看NetWork检测的请求，我们还需要完成这个需求
 
-  > 请求网址: http://localhost:8080/api/blog/of/user?&id=2&current=1
+  > 请求网址: `http://localhost:8080/api/blog/of/user?&id=2&current=1`
   > 请求方法: GET
 
 - 编写`查询用户笔记`方法
@@ -5991,7 +5991,7 @@ public Result saveBlog(Blog blog) {
 
 - 点击个人主页中的`关注`栏，查看发送的请求
 
-  > 请求网址: http://localhost:8080/api/blog/of/follow?&lastId=1667472294526
+  > 请求网址: `http://localhost:8080/api/blog/of/follow?&lastId=1667472294526`
   > 请求方法: GET
 
 - 在BlogController中创建对应的方法，具体实现去ServiceImpl中完成
@@ -6400,7 +6400,7 @@ ZSetOperations 是 Spring Data Redis 针对有序集合（Sorted Set/ZSet）的�
 
 - 点击距离分类，查看发送的请求
 
-  > 请求网址: http://localhost:8080/api/shop/of/type?&typeId=1&current=1&x=120.149993&y=30.334229
+  > 请求网址: `http://localhost:8080/api/shop/of/type?&typeId=1&current=1&x=120.149993&y=30.334229`
   > 请求方法: GET
 
 - 看样子是ShopController中的方法，那我们现在来修改其代码，除了typeId，分页码，我们还需要其坐标
@@ -6972,3 +6972,4 @@ RedisGeoCommands.GeoSearchCommandArgs.newGeoSearchArgs().includeDistance().limit
 **anyMatch / allMatch / noneMatch**：匹配判断**findFirst / findAny**：查找元素（返回 *Optional*）
 
 详细对于流的操作可以看[讲透JAVA Stream的collect用法与原理，远比你想象的更强大-腾讯云开发者社区-腾讯云](https://cloud.tencent.com/developer/article/2066869)
+
