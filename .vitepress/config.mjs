@@ -17,7 +17,7 @@ export default defineConfig({
         ],
        },
       {text:'笔记',link:'/front-end/java/'},
-      {text:'资料收藏',link:'/resources'},
+      {text:'工作',link:'/work'},
       { text: '通信', 
         items: [
           { text: '通信', link: '/' },
