@@ -25,6 +25,12 @@ import { withBase } from 'vitepress'
     <p class="desc">以https://github.com/13145424485/management为例，学习springboot等技术</p>
     <span class="cta">阅读 &rarr;</span>
   </a>
+  <a class="guide-card" :href="withBase('/front-end/java/spring%20cloud')">
+    <p class="label">微服务</p>
+    <p class="title">Spring Cloud</p>
+    <p class="desc">注册/配置中心、网关、负载均衡、限流熔断与链路追踪的核心用法。</p>
+    <span class="cta">开始 &rarr;</span>
+  </a>
   <a class="guide-card" :href="withBase('/front-end/java/常见注释类')">
     <p class="label">速查</p>
     <p class="title">常见注释类</p>
@@ -37,6 +43,12 @@ import { withBase } from 'vitepress'
     <p class="desc">集合、工具类、并发常用写法。</p>
     <span class="cta">进入 &rarr;</span>
   </a>
+  <a class="guide-card" :href="withBase('/front-end/java/Mybatis')">
+    <p class="label">数据访问</p>
+    <p class="title">MyBatis</p>
+    <p class="desc">SQL 映射、分页、多数据源、缓存配置与常见踩坑记录。</p>
+    <span class="cta">查看 &rarr;</span>
+  </a>
   <a class="guide-card accent" :href="withBase('/front-end/java/redis')">
     <p class="label">专题</p>
     <p class="title">Redis</p>
@@ -48,7 +60,7 @@ import { withBase } from 'vitepress'
 <style scoped>
 .guide-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 16px;
   margin-top: 32px;
 }
