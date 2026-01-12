@@ -601,7 +601,7 @@ public class ConsumerTest {
 ### 3.4 Fanout
 
 - Fanout直译是扇出，但是在MQ中叫`广播`更合适
-  ![zjaUEj.md](C:\Users\22373\Desktop\vitepress\image、\RocketMQ\zjaUEj.md.png)
+  ![zjaUEj.md](../../image、/RocketMQ/zjaUEj.md.png)
 
 - 在广播模式下，消息发送流程是这样的
   1. 可以存在多个队列
@@ -901,7 +901,7 @@ public void testDirectExchange() {
 - `item.#`：能够匹配`item.kyle.violet`或者`item.kyle`
 - `item.*`：只能匹配`item.kyle`或者`item.violet`
 
-![](C:\Users\22373\Desktop\vitepress\image、\RocketMQ\zj4W8K.md.png)
+![](../../image、/RocketMQ/zj4W8K.md.png)
 
 - 解释
   - Queue1绑定的是`china.#`，因此凡是以`china.`开头的Routing Key都会被匹配到，包括`china.news`和`china.weather`
@@ -909,7 +909,7 @@ public void testDirectExchange() {
 
 案例需求如下图
 
-![](C:\Users\22373\Desktop\vitepress\image、\RocketMQ\zj5Sbj.md.png)
+![](../../image、/RocketMQ/zj5Sbj.md.png)
 
 1. 利用`@RabbitListener`声`明Exchange`、`Queue`、`RoutingKey`
 2. 在`consumer`服务中，编写两个消费者方法，分别监听`topic.queue1`和`topic.queue2`
