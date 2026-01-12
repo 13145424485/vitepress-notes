@@ -55,6 +55,12 @@ import { withBase } from 'vitepress'
     <p class="desc">以黑马点评为例，缓存、分布式锁、秒杀场景的踩坑记录与解决方案。</p>
     <span class="cta">快速跳转 &rarr;</span>
   </a>
+  <a class="guide-card" :href="withBase('/front-end/java/RocketMQ')">
+    <p class="label">消息队列</p>
+    <p class="title">RocketMQ</p>
+    <p class="desc">MQ 基础、RabbitMQ 安装与 SpringAMQP 入门。</p>
+    <span class="cta">开始 &rarr;</span>
+  </a>
 </div>
 
 <style scoped>
