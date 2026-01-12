@@ -1,4 +1,4 @@
-# 记忆中 · 笔记博客
+# 记忆中 · 笔记博客  https://13145424485.github.io/vitepress-notes/
 
 基于 **VitePress** 的个人笔记站点，内容目前主要集中在 Java、Redis、LeetCode 题解、通信基础等。
 
