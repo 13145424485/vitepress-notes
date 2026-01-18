@@ -43,6 +43,12 @@ import { withBase } from 'vitepress'
     <p class="desc">集合、工具类、并发常用写法。</p>
     <span class="cta">进入 &rarr;</span>
   </a>
+  <a class="guide-card" :href="withBase('/front-end/java/JVM')">
+    <p class="label">原理</p>
+    <p class="title">JVM</p>
+    <p class="desc">运行时内存结构、类加载、GC 与常见问题排查。</p>
+    <span class="cta">进入 &rarr;</span>
+  </a>
   <a class="guide-card" :href="withBase('/front-end/java/Mybatis')">
     <p class="label">数据访问</p>
     <p class="title">MyBatis</p>
