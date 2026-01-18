@@ -1,4 +1,4 @@
-一、JVM
+﻿一、JVM
 
 ## 1.什么是JVM?
 
@@ -16,7 +16,7 @@
 
 ## JVM 在 Java 中是如何工作的
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\pprzoLT.png)
+![](/image、/JVM/pprzoLT.png)
 
 - JVM主要分为三个子系统
   1. 类加载器（ClassLoader）
@@ -167,7 +167,7 @@
   - 在第二行打断点，然后F7步入，当我们第一次步入的时候，method1会入栈
   - 由于我们在method1中调用了method2，所以再次步入时，method2也会入栈，如下图
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppyPbp4.png)
+![](/image、/JVM/ppyPbp4.png)
 
 - 当我们点击步出时，method2执行完毕，释放内存，出栈，返回上一次方法调用的位置，即method1
 - 再次步出，method1执行完毕，释放内存，出栈
@@ -320,7 +320,7 @@ A:栈内存的分配大小应该根据实际需要来确定。栈内存的分配
 
      - 还记得前面可以修改栈内存吗，现在我们将栈内存设置的小一些，再次执行此方法，只递归了`3929`次
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppyZTbj.png)
+![](/image、/JVM/ppyZTbj.png)
 
 栈帧过大导致栈内存溢出
 
@@ -591,7 +591,7 @@ A:栈内存的分配大小应该根据实际需要来确定。栈内存的分配
 
 下面使用jconsole进行测试
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\pp2Y55t.png)
+![](/image、/JVM/pp2Y55t.png)
 
 ### 案例
 
@@ -601,7 +601,7 @@ A:栈内存的分配大小应该根据实际需要来确定。栈内存的分配
   - 那么原因可能就是新生代对象一直存活，导致垃圾回收的时候回收不了多少内存，同时这些存活的新生代转为老年代
 - 下面使用jvisualvm进行诊断
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\pp2tjyD.png)
+![](/image、/JVM/pp2tjyD.png)
 
 可以看到有一个集合占了200M左右，那我们继续查找最大的对象
 
@@ -641,7 +641,7 @@ A:栈内存的分配大小应该根据实际需要来确定。栈内存的分配
 
 ### 组成
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\pp2d51x.png)
+![](/image、/JVM/pp2d51x.png)
 
 ### 方法区内存溢出
 
@@ -1325,7 +1325,7 @@ public class Demo_13 {
 
 监测内存String和char[]加起来大概占用了250M
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppWPpwj.png)
+![](/image、/JVM/ppWPpwj.png)
 
 ```java
 public class Demo_13 {
@@ -1489,11 +1489,11 @@ public class Demo_13 {
 
   - 传统IO，将文件读取到系统缓冲区中，但是Java代码不能直接读取系统缓冲区，所以需要在堆内存中分配一块Java缓冲区，将数据从系统缓冲区读取到Java缓冲区后，才能进行写操作
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppWku7Q.png)
+![](/image、/JVM/ppWku7Q.png)
 
 直接内存的Direct Memory对Java堆内存和系统内存是共享的一块内存区，那么磁盘文件就可以直接读取到Direct Memory，而Java堆内存也可以直接访问Direct Memory
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppWkNBF.png)
+![](/image、/JVM/ppWkNBF.png)
 
 #### 直接内存溢出
 
@@ -1569,15 +1569,15 @@ public class Demo_13 {
 
 1. 分配内存前的内存使用情况
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppWeVeK.png)
+![](/image、/JVM/ppWeVeK.png)
 
 2.分配内存完毕后的使用情况
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppWeuJH.png)
+![](/image、/JVM/ppWeuJH.png)
 
 3.执行垃圾回收后的使用情况
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppWeQSA.png)
+![](/image、/JVM/ppWeQSA.png)
 
 - 在我们的单步调试中，执行了垃圾回收后，`直接内存被释放了`，这显然与我们之前所说的冲突啊，这是怎么回事呢？
 - 先别急，我们先来了解一下直接内存应该是怎样被释放的，Java里有一个非常底层的类`Unsafe`，它可以分配直接内存和释放直接内存，但是一般不建议我们直接使用Unsafe类，都是JDK内部自己去使用这个类的。
@@ -1762,7 +1762,7 @@ public class Demo_16 {
 
 单步调试，观察直接内存占用情况，执行垃圾回收后，直接内存没有被释放，那么此时我们就只能通过Unsafe的freeMemory()方法来手动释放直接内存了
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppWYZjO.png)
+![](/image、/JVM/ppWYZjO.png)
 
 # 二、JVM垃圾回收
 
@@ -1773,7 +1773,7 @@ public class Demo_16 {
 - 当一个对象被引用是，就当引用对象的值`+1`，当引用对象的值为`0`时，则说明该对象没有被引用，那么就可以被垃圾回收器回收
 - 这个引用计数法听起来很不错，而且实现起来也非常的简单，可是它有一个弊端，如下图所示，当两个对象循环引用时，两个对象的计数都未1，就导致这两个对象都无法被释放
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\e99177be2623caaa5122daf656395f11.png)
+![](/image、/JVM/e99177be2623caaa5122daf656395f11.png)
 
 ### 可达性分析算法
 
@@ -2059,7 +2059,7 @@ public class Demo_16 {
 ## 分代垃圾回收
 
 - JVM（Java虚拟机）的分代垃圾回收是一种优化内存回收的技术。它利用对象的生命周期来将堆（heap）分为不同的区域，然后针对不同区域的特点采用不同的垃圾回收算法。
-  ![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppf8hYq.png)
+  ![](/image、/JVM/ppf8hYq.png)
 - 对象首先分配在伊甸园区域
 - 新生代空间不足时，触发`minor gc`，`伊甸园`和`from`存活的对象使用`copy`复制到`to`中，存活的对象年龄`+1`并且交换`from`和`to`
 - `minor gc`会引发`stop the world（砸瓦鲁多！！）`，暂停其它用户的线程，等垃圾回收结束，用户线程才恢复运行
@@ -2089,7 +2089,7 @@ public class Demo_16 {
 - 串行收集器的缺点主要是单线程执行垃圾回收操作，不能充分利用多核CPU的计算能力，同时垃圾回收操作会阻塞应用程序的运行，可能会导致长时间的停顿。因此，在大型的、多线程的应用程序中，通常不适合使用串行收集器进行垃圾回收。
 - 对应的VM参数：`-XX:+UseSerialGC = Serial + SerialOld`
 - 下图中，其他CPU需要等待`CPU 2`执行完垃圾回收后，才能继续运行
-  ![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppfDKTf.png)
+  ![](/image、/JVM/ppfDKTf.png)
 
 ### 吞吐量优先收集器（Parallel收集器）
 
@@ -2129,7 +2129,7 @@ public class Demo_16 {
 
      - 这个参数用于设置垃圾回收线程的数量。默认值是CPU核心数的1/4。可以根据应用程序的需求和硬件环境来调整该参数的值，以达到更好的垃圾回收效果。
 
-![pphfXnO](C:\Users\22373\Desktop\vitepress\image、\JVM\pphfXnO.png)
+![pphfXnO](/image、/JVM/pphfXnO.png)
 
 ### CMS收集器（响应时间优先）
 
@@ -2146,7 +2146,7 @@ public class Demo_16 {
   4. 并发清除阶段（Concurrent Sweeping）：在这个阶段中，CMS垃圾收集器会在应用程序线程运行的同时清除所有标记为垃圾的对象。这个过程由多个线程并发执行，因此它的停顿时间比较短。
   5. 最终标记阶段（Final Remark）：在这个阶段中，CMS垃圾收集器会暂停所有应用程序线程，并且重新标记出在并发清除阶段中有变化的对象。这个过程由一个线程来完成，因此它的停顿时间比较短。
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\pph4Ca4.png)
+![](/image、/JVM/pph4Ca4.png)
 
 #### 优缺点
 
@@ -2211,20 +2211,20 @@ public class Demo_16 {
 
 - 在G1垃圾回收器中，垃圾回收的过程可以分为三种阶段：`Young Collection`、`Young Collection + Concurrent Mark`（简称Young Collection + CM）和`Mixed Collection`。
 
-  ![](C:\Users\22373\Desktop\vitepress\image、\JVM\pphHKdf.png)
+  ![](/image、/JVM/pphHKdf.png)
 
 - 下面我们分别介绍一下这三种垃圾回收阶段和特点：
   1. `Young Collection`（年轻代垃圾回收）
      - Young Collection是指对年轻代（Young Generation）的垃圾回收。在G1垃圾回收器中，年轻代通常是由几个连续的Region组成的。在年轻代垃圾回收期间，G1垃圾回收器会扫描年轻代内的所有对象，并标记那些被引用的对象。然后，它会将未被引用的对象回收掉，并将被引用的对象移动到下一个垃圾回收周期的存活区域（Survivor Region）中。
-       ![](C:\Users\22373\Desktop\vitepress\image、\JVM\pphH2ex.png)
+       ![](/image、/JVM/pphH2ex.png)
   2. `Young Collection + Concurrent Mark`（年轻代垃圾回收 + 并发标记）
      - Young Collection + CM是：指在Young GC时会进行GC Root的初始标记，当老年代占用堆空间比例达到阈值时，对整个堆内存进行并发标记。由下面的VM参数决定
        - -XX:InitiatingHeapOccupancyPercent=percent （默认45%）
      - 在并发标记过程中，G1垃圾回收器会扫描所有的可达对象，并标记它们。并发标记可以与应用程序并行进行，不会停顿应用程序的线程。当并发标记完成后，G1垃圾回收器就可以知道哪些对象是存活的，哪些对象是垃圾了。
-       ![](C:\Users\22373\Desktop\vitepress\image、\JVM\pphHWTK.png)
+       ![](/image、/JVM/pphHWTK.png)
   3. `Mixed Collection`（混合垃圾回收）
      - Mixed Collection是指对整个堆内存进行垃圾回收，包括年轻代和老年代（Old Generation）的垃圾回收。在Mixed Collection期间，G1垃圾回收器会尽可能地回收那些垃圾占用空间较大的Region，并将它们标记为”空闲”状态，以便在以后的内存分配中使用。与Young Collection不同，Mixed Collection不仅回收年轻代的对象，还回收老年代的对象，因此它需要更长的停顿时间。同时，Mixed Collection也会和并发标记一起执行，以最小化应用程序的停顿时间。
-       ![](C:\Users\22373\Desktop\vitepress\image、\JVM\pphH4YD.png)
+       ![](/image、/JVM/pphH4YD.png)
 - 新生代内存不足发生的垃圾收集：minor gc
 - 当G1垃圾回收器的回收速度跟不上Java应用程序产生垃圾的速度时，垃圾对象在堆内存中不断增加，导致堆内存空间的压力增大。当堆内存空间的压力达到G1垃圾回收器的阈值时，会触发FULL GC。
 
@@ -2234,7 +2234,7 @@ public class Demo_16 {
 - 为了解决这个问题，G1垃圾回收器采用了一种卡表技术，将老年代划分为多个区域，并将每个区域划分为一组成为`卡`的块。每个卡的大小约为512KB，如果老年代中的一个对象引用了新生代中的对象，那么该卡就被标记为脏卡
 - 在新生代对象引用发生变化时，使用post-write barrier和dirty card queue技术来更新卡表，将引用变更信息添加到Remembered Set中，标记为脏卡
 - 在进行新生代垃圾回收时，只需要扫描这些脏卡中的对象，即可找到所有的跨代引用对象，避免了对整个老年代进行遍历的开销，提高了垃圾回收的效率。
-  ![](C:\Users\22373\Desktop\vitepress\image、\JVM\pp4XhcD.png)
+  ![](/image、/JVM/pp4XhcD.png)
 
 #### 重新标记阶段
 
@@ -2557,7 +2557,7 @@ public class Demo_16 {
   od -t xC target/classes/com/demo/HelloWorld.class
   ```
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\pp5L8lF.png)
+![](/image、/JVM/pp5L8lF.png)
 
 - 根据JVM规范，类文件结构如下
 
@@ -3348,11 +3348,11 @@ SourceFile: "Demo_20.java"
 
 常量池载入运行时常量池
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppTr326.png)
+![](/image、/JVM/ppTr326.png)
 
 方法字节码载入方法区
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppTrdIA.png)
+![](/image、/JVM/ppTrdIA.png)
 
 main线程开始运行、分配栈帧内存
 
@@ -3361,7 +3361,7 @@ main线程开始运行、分配栈帧内存
   - 包含四个局部变量
     
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppTrDRP.png)
+![](/image、/JVM/ppTrDRP.png)
 
 执行引擎开始执行字节码
 
@@ -3371,56 +3371,56 @@ main线程开始运行、分配栈帧内存
   - ldc：将一个int压入操作数栈
   - ldc2_w：将一个long压入操作数栈（分两次压入，因为long占8个字节）
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppTr2ZQ.png)
+![](/image、/JVM/ppTr2ZQ.png)
 
 istore_1
 
 - 将操作数栈顶数据弹出，存入局部变量表slot 1
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppT6Rde.png)
+![](/image、/JVM/ppT6Rde.png)
 
 ldc #3
 
 - 从常量池加载#3数据到操作数栈
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppT6OoQ.png)
+![](/image、/JVM/ppT6OoQ.png)
 
 istore_2
 
 - 将操作数栈顶数据弹出，存入局部变量表slot 2
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppTc9yV.png)
+![](/image、/JVM/ppTc9yV.png)
 
 - iload_1
   - 将局部变量表slot 1的值加载到操作数栈中
 - iload_2
   - 将局部变量表slot 2的值加载到操作数栈中
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppTcsYj.png)
+![](/image、/JVM/ppTcsYj.png)
 
 iadd
 
 - 从操作数栈顶部弹出两个int类型的数值，将这两个数值相加，并将其结果压入操作数栈顶部；
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppTcTh9.png)
+![](/image、/JVM/ppTcTh9.png)
 
 istore_3
 
 - 将操作数栈顶部数据弹出，存入局部变量表slot 3
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppTcXnK.png)
+![](/image、/JVM/ppTcXnK.png)
 
 getstatic #4
 
 - 从常量池加载#4静态字段到操作数栈
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppTgEB8.png)
+![](/image、/JVM/ppTgEB8.png)
 
 iload_3
 
 - 将局部变量表slot 3的值加载到操作数栈中
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppTgnhj.png)
+![](/image、/JVM/ppTgnhj.png)
 
 invokevirtual #5
 
@@ -3432,12 +3432,12 @@ invokevirtual #5
 
 - 传递参数、执行新栈帧中的字节码
 
-  ![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppTgM3n.png)
+  ![](/image、/JVM/ppTgM3n.png)
 
 - 执行完毕，弹出栈帧
 - 清除main操作数栈内容
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppTglj0.png)
+![](/image、/JVM/ppTglj0.png)
 
 - return
   - 完成main方法调用，弹出main栈帧
@@ -3997,7 +3997,7 @@ invokevirtual #5
      select d from com.demo.Dog d
      ```
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\pp7s72q.png)
+![](/image、/JVM/pp7s72q.png)
 
 
 
@@ -4017,14 +4017,14 @@ invokevirtual #5
 
    - 结果中第二行`0x000001f1f48841a0`即为Class的内存地址
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\pp7yJoQ.png)
+![](/image、/JVM/pp7yJoQ.png)
 
 查看类的vtable
 
 - 方法1：ALT + R进入Inspector工具输入刚才的Class内存地址
 - 方法2：或者Tools -> Class Browser 输入Dog查找，可以得到相同的结果
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\pp7ycFJ.png)
+![](/image、/JVM/pp7ycFJ.png)
 
 1. - 无论通过哪种方法，都可以找到Dog Class的vtable长度为6，意思就是Dog类会有6个虚方法（多台相关的，final、static不会列入）
 
@@ -5269,7 +5269,7 @@ invokevirtual #5
   - instanceKlass这样的`元数据`是存储在方法区（1.8后是在元空间内），但_java_mirror是存储在堆中
   - 可以通过HSDB工具查看
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppHhCmn.png)
+![](/image、/JVM/ppHhCmn.png)
 
 ### 链接
 
@@ -5407,12 +5407,12 @@ invokevirtual #5
 
    - 使用loadClass方法不会导致类的解析和初始化
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppHo4r4.png)
+![](/image、/JVM/ppHo4r4.png)
 
 - - 可以看到类D现在是`UnresolvedClass`，也就是未经解析的类，在常量池中仅仅是一个符号
 - 使用new C()的方式会导致类的解析和初始化
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppHoqG6.png)
+![](/image、/JVM/ppHoqG6.png)
 
 可以看到此时类D已经加载成功了，同时在类C的常量池中也可以解析类D的地址
 
@@ -7154,7 +7154,7 @@ class NativeMethodAccessorImpl extends MethodAccessorImpl {
 
 - Java的内存模型如下，完成静态变量的自增、自减需要在主存与线程内存中进行数据交换
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppOSFv4.png)
+![](/image、/JVM/ppOSFv4.png)
 
 - 出现负数的情况：
 
@@ -7279,15 +7279,15 @@ class NativeMethodAccessorImpl extends MethodAccessorImpl {
 
   1. 初始状态：t线程刚开始就从主存读取到了run的值到工作内存
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppOC3MF.png)
+![](/image、/JVM/ppOC3MF.png)
 
 因为t线程要频繁的从主存中读取run的值，JIT编译器会将run的值缓存至自己工作内存的高速缓存中，减少对主存中run的访问，提高效率
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppOCtaR.png)
+![](/image、/JVM/ppOCtaR.png)
 
 1秒过后，main线程修改了run值，并同步至主存，但是t现在已经是从自己工作内存的高速缓存中读取的run，结果永远是true
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppOCaPx.png)
+![](/image、/JVM/ppOCaPx.png)
 
 ### 解决方法
 
@@ -7399,7 +7399,7 @@ class NativeMethodAccessorImpl extends MethodAccessorImpl {
 mvn archetype:generate -DarchetypeGroupId=org.openjdk.jcstress -DarchetypeArtifactId=jcstress-java-test-archetype -DarchetypeVersion=0.5 -DgroupId=com.demo.jmm -DartifactId=com.demo.jmm.my-test-project -Dversion=1.0-SNAPSHOT
 ```
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppOExQx.png)
+![](/image、/JVM/ppOExQx.png)
 
 修改生成的测试方法
 
@@ -7429,7 +7429,7 @@ public class ConcurrencyTest {
 
 执行maven clean install，生成jar包
 
-![](C:\Users\22373\Desktop\vitepress\image、\JVM\ppOVe6P.png)
+![](/image、/JVM/ppOVe6P.png)
 
 - 使用java -jar命令启动测试，结果如下
 
@@ -8019,3 +8019,4 @@ public class ConcurrencyTest {
 
    - CopyOnWriteArrayList
    - ConyOnWriteSet
+

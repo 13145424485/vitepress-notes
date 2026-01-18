@@ -12,6 +12,9 @@ hero:
     - theme: alt
       text: Redis 速查
       link: /front-end/java/redis
+    - theme: alt
+      text: JVM 指南
+      link: /front-end/java/JVM
 ---
 
 <script setup>
