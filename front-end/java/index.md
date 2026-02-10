@@ -15,6 +15,9 @@ hero:
     - theme: alt
       text: JVM 指南
       link: /front-end/java/JVM
+    - theme: alt
+      text: JUC 并发
+      link: /front-end/java/JUC
 ---
 
 <script setup>
@@ -51,6 +54,12 @@ import { withBase } from 'vitepress'
     <p class="title">JVM</p>
     <p class="desc">运行时内存结构、类加载、GC 与常见问题排查。</p>
     <span class="cta">进入 &rarr;</span>
+  </a>
+  <a class="guide-card" :href="withBase('/front-end/java/JUC')">
+    <p class="label">并发</p>
+    <p class="title">JUC</p>
+    <p class="desc">线程、锁、CAS、AQS 与并发容器的核心知识与实践记录。</p>
+    <span class="cta">阅读 &rarr;</span>
   </a>
   <a class="guide-card" :href="withBase('/front-end/java/Mybatis')">
     <p class="label">数据访问</p>

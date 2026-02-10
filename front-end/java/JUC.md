@@ -1,4 +1,4 @@
-# JUC
+ JUC
 
 ## 进程
 
@@ -29,6 +29,10 @@
 参考视频：https://www.bilibili.com/video/BV16J411h7Rd
 
 笔记的整体结构依据视频编写，并随着学习的深入补充了很多知识
+
+内容主要来源：https://github.com/Seazean/JavaNote
+
+他山之石：https://cyborg2077.github.io/2023/06/05/JUC/
 
 
 
@@ -282,9 +286,9 @@ Thread 类 API：
 
 #### run start
 
-run：称为线程体，包含了要执行的这个线程的内容，方法运行结束，此线程随即终止。直接调用 run 是在主线程中执行了 run，没有启动新的线程，需要顺序执行
+run：称为线程体，包含了要执行的这个线程的内容，方法运行结束，此线程随即终止。**直接调用 run 是在主线程中执行了 run**，没有启动新的线程，需要顺序执行
 
-start：使用 start 是启动新的线程，此线程处于就绪（可运行）状态，通过新的线程间接执行 run 中的代码
+start：使用 start 是**启动新的线程**，此线程处于就绪（可运行）状态，通过新的线程间接执行 run 中的代码
 
 说明：**线程控制资源类**
 
@@ -307,19 +311,94 @@ sleep：
 * sleep() 方法的过程中，**线程不会释放对象锁**
 * 其它线程可以使用 interrupt 方法打断正在睡眠的线程，这时 sleep 方法会抛出 InterruptedException
 * 睡眠结束后的线程未必会立刻得到执行，需要抢占 CPU
-* 建议用 TimeUnit 的 sleep 代替 Thread 的 sleep 来获得更好的可读性
+* 建议用 TimeUnit 的 sleep 代替 Thread 的 sleep 来获得更好的可读性。                                                                                                        TimeUnit是一个枚举类，提供了对时间单位的抽象表示，如秒、毫秒、微秒等。它的sleep方法接受一个时间值和一个TimeUnit参数，用于指定线程休眠的时间。例如，TimeUnit.SECONDS.sleep(1)表示线程休眠1秒，同时我们也可以将SECONDS换成HOUR、DAYS等时间值
 
 yield：
 
-* 调用 yield 会让提示线程调度器让出当前线程对 CPU 的使用
+* 调用 yield 会让提示线程调度器让出当前线程对 CPU 的使用，让当前线程进入就绪状态
+
 * 具体的实现依赖于操作系统的任务调度器
+
 * **会放弃 CPU 资源，锁资源不会释放**
+
+* ```java
+  public static void main(String[] args) throws InterruptedException {
+      Thread t1 = new Thread(() -> {
+          int count = 0;
+          while (true) {
+              System.out.println("t1 --> " + count++);
+          }
+      }, "t1");
+      Thread t2 = new Thread(() -> {
+          int count = 0;
+          while (true) {
+              // 执行yield
+              Thread.yield();
+              System.out.println("           t2 --> " + count++);
+          }
+      }, "t2");
+      t1.start();
+      t2.start();
+  }
+  ```
+
+结果如下，t1输出了10w条，t2才1.7w
+
+```
+t1 --> 106221
+t1 --> 106222
+        t2 --> 17256
+t1 --> 106223
+t1 --> 106224
+```
 
 
 
 ***
 
+#### 线程优先级
 
+- 线程优先级会提示(hint)调度器优先调度该线程，但它仅仅是一个提示，调度器可以忽略它
+
+- 如果CPU比较忙，那么优先级高的线程会获得更多的时间片，但CPU闲时，优先级几乎没作用
+
+  - 示例代码
+
+    ```java
+    public static void main(String[] args) throws InterruptedException {
+        Thread t1 = new Thread(() -> {
+            int count = 0;
+            while (true) {
+                System.out.println("t1 --> " + count++);
+            }
+        }, "t1");
+        Thread t2 = new Thread(() -> {
+            int count = 0;
+            while (true) {
+                System.out.println("           t2 --> " + count++);
+            }
+        }, "t2");
+        // t1设置最低优先级
+        t1.setPriority(Thread.MIN_PRIORITY);
+        // t2设置最高优先级
+        t2.setPriority(Thread.MAX_PRIORITY);
+        t1.start();
+        t2.start();
+    }
+    ```
+
+  - 结果如下，t1打印的比t2多，CPU闲的时候，优先级几乎没作用
+
+     
+
+    （它已经是个成熟的调度器了，有自己的想法）
+
+    ```
+            t2 --> 64136
+            t2 --> 64137
+    t1 --> 90915
+    t1 --> 90916
+    ```
 
 #### join
 
@@ -371,7 +450,142 @@ public class Test {
 }
 ```
 
+- 分析
 
+  - 因为主线程和t1是并行执行的，t1线程需要休眠1s后才能执行`r = 10`
+
+  - 而主线程一开始就要打印r的结果，所以只能输出r = 0
+
+    ```
+    13:09:22.864 [main] c.Sync - 主线程开始
+    13:09:22.958 [t1] c.Sync - t1开始
+    13:09:22.123 [main] c.Sync - 结果为：0
+    13:09:22.123 [main] c.Sync - 主线程结束
+    13:09:23.234 [t1] c.Sync - t1结束
+    ```
+
+- 解决方法
+
+  - 在t1.start()后面加上t1.join()，这样主线程会等待t1执行完毕，最终
+
+    ```
+    r = 10
+    ```
+
+    ```
+    13:12:25.864 c.Sync [main] - 主线程开始
+    13:12:25.915 c.Sync [t1] - t1开始
+    13:12:26.929 c.Sync [t1] - t1结束
+    13:12:26.929 c.Sync [main] - 结果为：10
+    13:12:26.931 c.Sync [main] - 主线程结束
+    ```
+
+#### 等待多个结果
+
+- 下面代码耗时大约多久？
+
+  ```java
+  public static void main(String[] args) throws InterruptedException {
+      // 休眠1s
+      Thread t1 = new Thread(() -> {
+          try {
+              TimeUnit.SECONDS.sleep(1);
+          } catch (InterruptedException e) {
+              throw new RuntimeException(e);
+          }
+          r1 = 10;
+      });
+      // 休眠2s
+      Thread t2 = new Thread(() -> {
+          try {
+              TimeUnit.SECONDS.sleep(2);
+          } catch (InterruptedException e) {
+              throw new RuntimeException(e);
+          }
+          r2 = 20;
+      });
+      long start = System.currentTimeMillis();
+      t1.start();
+      t2.start();
+      t1.join();
+      t2.join();
+      long end = System.currentTimeMillis();
+      log.debug("r1：{}，r2：{}，耗时：{}ms", r1, r2, end - start);
+  }
+  ```
+
+- 分析一下
+
+  - t1.join()，等待t1执行完毕，但t2也没有停止，也在运行
+  - t2.join()，1s后，执行到此，t2也运行了1s，再等待1s也执行完毕了
+
+- 如果颠倒两个join，运行结果也不会变，最终耗时均为2s左右
+
+  ```
+  13:27:50.041 c.Sync [main] - r1：10，r2：20，耗时：2010ms
+  ```
+
+  ![img](https://s1.ax1x.com/2023/06/08/pCk5Lxe.png)
+
+#### 有时效的join
+
+- join()方法还有一个带参数的，可以设定最大等待时长毫秒数
+
+  - 没等够，输出：
+
+    ```
+    14:09:44.417 c.Sync [main] - r：0，耗时：511ms
+    ```
+
+    ```java
+    static int r = 0;
+    
+    public static void main(String[] args) throws InterruptedException {
+        // 休眠1s
+        Thread t1 = new Thread(() -> {
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            r = 10;
+        });
+        long start = System.currentTimeMillis();
+        t1.start();
+        // 最多等0.5s
+        t1.join(500);
+        long end = System.currentTimeMillis();
+        log.debug("r：{}，耗时：{}ms", r, end - start);
+    }
+    ```
+
+  - 等够了，线程执行结束会导致join结束，虽然等1.5s，但1s就结束，耗时1s：
+
+    ```
+    14:10:47.975 c.Sync [main] - r：10，耗时：1001ms
+    ```
+
+    ```java
+    static int r = 0;
+    
+    public static void main(String[] args) throws InterruptedException {
+        // 休眠1s
+        Thread t1 = new Thread(() -> {
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            r = 10;
+        });
+        long start = System.currentTimeMillis();
+        t1.start();
+        // 最多等1.5s
+        t1.join(1500);
+        long end = System.currentTimeMillis();
+        log.debug("r：{}，耗时：{}ms", r, end - start);
+    }
+    ```
 
 ***
 
@@ -387,7 +601,7 @@ public class Test {
 
 `public boolean isInterrupted()`：判断当前线程是否被打断，不清除打断标记
 
-打断的线程会发生上下文切换，操作系统会保存线程信息，抢占到 CPU 后会从中断的地方接着运行（打断不是停止）
+打断的线程会发生上下文切换，操作系统会保存线程信息，抢占到 CPU 后会从中断的地方接着运行**（打断不是停止）**
 
 * sleep、wait、join 方法都会让线程进入阻塞状态，打断线程**会清空打断状态**（false）
 
@@ -535,7 +749,7 @@ class TwoPhaseTermination {
 
 
 
-#### daemon
+#### daemon  守护线程
 
 `public final void setDaemon(boolean on)`：如果是 true ，将此线程标记为守护线程 
 
@@ -669,7 +883,7 @@ Java 提供了线程优先级的机制，优先级会提示（hint）调度器�
 
 ### 线程状态
 
-进程的状态参考操作系统：创建态、就绪态、运行态、阻塞态、终止态
+进程的状态参考操作系统：**创建态、就绪态、运行态、阻塞态、终止态**
 
 线程由生到死的完整过程（生命周期）：当线程被创建并启动以后，既不是一启动就进入了执行状态，也不是一直处于执行状态，在 API 中 `java.lang.Thread.State` 这个枚举中给出了六种线程状态：
 
@@ -703,7 +917,82 @@ Java 提供了线程优先级的机制，优先级会提示（hint）调度器�
 
 * RUNNABLE <--> BLOCKED：t 线程用 synchronized(obj) 获取了对象锁时竞争失败
 
+### 应用：烧水泡茶
 
+- 阅读华罗庚《统筹方法》，给出烧水泡茶的多线程解决方案
+  - 统筹方法，是一种安排工作进程的数学方法。它的实用范围极广泛，在企业管理和基本建设中，以及关系复杂的科研项目的组织与管理中，都可以应用。
+  - 怎样应用呢？主要是把工序安排好。
+  - 比如，想泡壶茶喝。当时的情况是：开水没有；水壶要洗，茶壶、茶杯要洗；火已生了，茶叶也有了。怎么办？
+    - 办法甲：洗好水壶，灌上凉水，放在火上；在等待水开的时间里，洗茶壶、洗茶杯、拿茶叶；等水开了，泡茶喝。
+    - 办法乙：先做好一些准备工作，洗水壶，洗茶壶茶杯，拿茶叶；一切就绪，灌水烧水；坐待水开了，泡茶喝。
+    - 办法丙：洗净水壶，灌上凉水，放在火上，坐待水开；水开了之后，急急忙忙找茶叶，洗茶壶茶杯，泡茶喝。
+  - 哪一种办法省时间？我们能一眼看出，第一种办法好，后两种办法都窝了工。
+  - 这是小事，但这是引子，可以引出生产管理等方面有用的方法来。
+  - 水壶不洗，不能烧开水，因而洗水壶是烧开水的前提。没开水、没茶叶、不洗茶壶茶杯，就不能泡茶，因而这些又是泡茶的前提。它们的相互关系，可以用下边的箭头图来表示：
+    [![img](https://s1.ax1x.com/2023/06/10/pCEHn0g.png)](https://s1.ax1x.com/2023/06/10/pCEHn0g.png)
+  - 从这个图上可以一眼看出，办法甲总共要16分钟（而办法乙、丙需要20分钟）。如果要缩短工时、提高工作效率，应当主要抓烧开水这个环节，而不是抓拿茶叶等环节。同时，洗茶壶茶杯、拿茶叶总共不过4分钟，大可利用“等水开”的时间来做。
+  - 是的，这好像是废话，卑之无甚高论。有如走路要用两条腿走，吃饭要一口一口吃，这些道理谁都懂得。但稍有变化，临事而迷的情况，常常是存在的。在近代工业的错综复杂的工艺过程中，往往就不是像泡茶喝这么简单了。任务多了，几百几千，甚至有好几万个任务。关系多了，错综复杂，千头万绪，往往出现“万事俱备，只欠东风”的情况。由于一两个零件没完成，耽误了一台复杂机器的出厂时间。或往往因为抓的不是关键，连夜三班，急急忙忙，完成这一环节之后，还得等待旁的环节才能装配。洗茶壶，洗茶杯，拿茶叶，或先或后，关系不大，而且同是一个人的活儿，因而可以合并成为：
+    [![img](https://s1.ax1x.com/2023/06/10/pCEHJXT.png)](https://s1.ax1x.com/2023/06/10/pCEHJXT.png)
+  - 看来这是”小题大做”，但在工作环节太多的时候，这样做就非常必要了
+  - 这里讲的主要是时间方面的事，但在具体生产实践中，还有其他方面的许多事。这种方法虽然不一定能直接解决所有问题，但是我们利用这种方法来考虑问题，也是不无裨益的。
+
+#### 解法1：join
+
+```java
+@Slf4j(topic = "c.MakeTea")
+public class TestTea {
+    public static void main(String[] args) {
+        Thread t1 = new Thread(() -> {
+            sleep(1);
+            log.debug("洗水壶");
+            sleep(15);
+            log.debug("烧开水");
+        }, "Kyle");
+        Thread t2 = new Thread(() -> {
+            sleep(1);
+            log.debug("洗茶壶");
+            sleep(2);
+            log.debug("洗茶杯");
+            sleep(1);
+            log.debug("拿茶叶");
+            try {
+                t1.join();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            log.debug("泡茶");
+        }, "Lucy");
+        t1.start();
+        t2.start();
+    }
+
+    static void sleep(int i) {
+        try {
+            TimeUnit.SECONDS.sleep(i);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}
+```
+
+- 结果
+
+  ```
+  13:55:52.453 c.MakeTea [Lucy] - 洗茶壶
+  13:55:52.453 c.MakeTea [Kyle] - 洗水壶
+  13:55:54.458 c.MakeTea [Lucy] - 洗茶杯
+  13:55:55.469 c.MakeTea [Lucy] - 拿茶叶
+  13:56:07.463 c.MakeTea [Kyle] - 烧开水  
+  13:56:07.463 c.MakeTea [Lucy] - 泡茶 
+  ```
+
+- 此种解法的缺陷
+
+  - 上面模拟的是Lucy等Kyle的水烧开了，Lucy泡茶，如果现在要让Kyle等Lucy把茶叶拿过来，由Kyle泡茶呢？
+  - 上面两个线程其实是各执行各的，如果要模拟Kyle把水壶交给Lucy泡茶，或者模拟Lucy把茶叶交给Kyle泡茶呢？
+
+- 这个缺陷我们后面会解决
 
 ***
 
@@ -741,7 +1030,86 @@ Java：
 
 
 
-## 同步
+## 同步---共享模型之管理
+
+### 共享带来的问题
+
+#### 小故事
+
+- 老王（操作系统）有一个功能强大的算盘（CPU），现在老王想把算盘租出去，赚点外快
+- 小南和小女（线程）来使用这个算盘来进行一些计算，并按照时间给老王支付费用
+- 但小南也不能一天24小时使用算盘，他得时不时小憩一会儿（sleep），又或者去吃饭上厕所（阻塞IO操作），有时候还需要一根烟，没烟的时候思路全无（wait）这些情况统称为阻塞
+- 在上面的那些情况下，算盘没利用起来，老王觉得有点不划算
+- 另外，小女也想用用算盘，如果总是让小南占着算盘，小女会觉得很不公平
+- 于是，老王灵机一动，想了个办法，让他们没人用一会儿，轮流使用算盘（CPU时间片）
+- 这样，当小南阻塞的时候，算盘可以分配给小女用，不会浪费，反之亦然
+- 最近执行的计算比较复杂，需要存储一些中间结果，而小南和小女的脑容量（工作内存）不够，所以老王申请了一个笔记本（主存），把一些中间结果先记在本上
+- 但由于分时系统，有一天还是发生了事故
+- 小南从笔记本上读取了初值0，做了一个自增+1计算，还没来得及写回结果，此时轮到小女用了
+- 于是小南嘴里念叨着，结果是1结果是1..，不甘心的上一边待着去了（上下文切换）
+- 小女此时看到笔记本上是0，于是做了一个-1的运算，并将结果-1写到笔记本上，此时小女的时间也用完了，又轮到小南了
+- 小南此时将嘴里一直念叨的1，写入了笔记本
+- 最终小南和小女都觉得自己没做错，但笔记本中的结果是1而不是0
+
+#### Java的体现
+
+- 两个线程对一个初值为0的静态变量做自增和自减操作，各执行5000次，观察结果
+
+  ```JAVA
+  @Slf4j(topic = "c.TestCalculate")
+  public class TestCalculate {
+      static int num = 0;
+  
+      public static void main(String[] args) throws InterruptedException {
+          Thread t1 = new Thread(() -> {
+              for (int i = 0; i < 5000; i++) {
+                  num++;
+              }
+          });
+  
+          Thread t2 = new Thread(() -> {
+              for (int i = 0; i < 5000; i++) {
+                  num--;
+              }
+          });
+  
+          t1.start();
+          t2.start();
+          t1.join();
+          t2.join();
+  
+          log.debug("结果为：{}", num);
+      }
+  }
+  ```
+
+- 多次运行，我们会发现结果有正有负，也有可能为0
+
+#### 问题分析
+
+- 为什么上面的结果不确定呢？因为Java中对静态变量的自增、自减操作并不是原子操作，这部分在我这篇文章的第二小节中做了详细的解释
+
+  JVM内存模型
+
+  https://cyborg2077.github.io/2023/04/11/JvmPart5/
+
+- 对i++(i为静态变量)，实际上会产生如下字节码指令
+
+  ```
+  getstatic i     // 获取静态变量i的值
+  iconst_1        // 准备常量1
+  iadd            // 自增
+  putstatic i     // 将修改后的值存入静态变量i
+  ```
+
+- 对于i--也是类似
+
+  ```
+  getstatic i     // 获取静态变量i的值
+  iconst_1        // 准备常量1
+  isub            // 自减
+  putstatic i     // 将修改后的值存入静态变量i
+  ```
 
 ### 临界区
 
@@ -760,7 +1128,7 @@ Java：
 
 管程（monitor）：由局部于自己的若干公共变量和所有访问这些公共变量的过程所组成的软件模块，保证同一时刻只有一个进程在管程内活动，即管程内定义的操作在同一时刻只被一个进程调用（由编译器实现）
 
-**synchronized：对象锁，保证了临界区内代码的原子性**，采用互斥的方式让同一时刻至多只有一个线程能持有对象锁，其它线程获取这个对象锁时会阻塞，保证拥有锁的线程可以安全的执行临界区内的代码，不用担心线程上下文切换
+**synchronized：对象锁，保证了临界区内代码的原子性**，**采用互斥的方式让同一时刻至多只有一个线程能持有对象锁**，其它线程获取这个对象锁时会阻塞，保证拥有锁的线程可以安全的执行临界区内的代码，不用担心线程上下文切换
 
 互斥和同步都可以采用 synchronized 关键字来完成，区别：
 
@@ -938,9 +1306,1027 @@ public static void main(String[] args) {
 }
 ```
 
+- 其实就是考查synchronized锁住的是哪个对象，有八种情形
 
+1. 情况一：线程1和线程2都是用n1作为锁，二者执行顺序随机，结果为`12`或`21`
 
+   ```java
+   @Slf4j(topic = "c.Number")
+   class Number {
+       public synchronized void a() {
+           log.debug("1");
+       }
+   
+       public synchronized void b() {
+           log.debug("2");
+       }
+   }
+   
+   
+   public class Tmp {
+   
+       public static void main(String[] args) {
+           Number n1 = new Number();
+           new Thread(() -> n1.a()).start();
+           new Thread(() -> n1.b()).start();
+       }
+   }
+   ```
 
+2. 情况二：t1和t2拿到的是同一把锁，执行顺序随机，如果t1先执行，则`1s后12`；如果t2先执行，则`2 1s后1`
+
+   ```java
+   @Slf4j(topic = "c.Number")
+   class Number {
+       public synchronized void a() {
+           Tmp.sleep(1);
+           log.debug("1");
+       }
+   
+       public synchronized void b() {
+           log.debug("2");
+       }
+   }
+   
+   
+   public class Tmp {
+       public static void main(String[] args) {
+           Number n1 = new Number();
+           new Thread(() -> n1.a()).start();
+           new Thread(() -> n1.b()).start();
+       }
+       
+       public static void sleep(int i){
+           try {
+               TimeUnit.SECONDS.sleep(i);
+           } catch (InterruptedException e) {
+               throw new RuntimeException(e);
+           }
+       }
+   }
+   ```
+
+3. 情况三：`3 1s后12`、`23 1s后1`、`32 1s后1`
+
+   ```java
+   @Slf4j(topic = "c.Number")
+   class Number {
+       public synchronized void a() {
+           Tmp.sleep(1);
+           log.debug("1");
+       }
+   
+       public synchronized void b() {
+           log.debug("2");
+       }
+   
+       public void c() {
+           log.debug("3");
+       }
+   }
+   
+   
+   public class Tmp {
+       public static void main(String[] args) {
+           Number n1 = new Number();
+           new Thread(() -> n1.a()).start();
+           new Thread(() -> n1.b()).start();
+           new Thread(() -> n1.c()).start();
+       }
+   
+       public static void sleep(int i){
+           try {
+               TimeUnit.SECONDS.sleep(i);
+           } catch (InterruptedException e) {
+               throw new RuntimeException(e);
+           }
+       }
+   }
+   ```
+
+4. 情况四：t1和t2用的锁分别是n1和n2，相当于没锁，由于t1线程需要休眠1s，固结果为`2 1s后1`
+
+   ```java
+   @Slf4j(topic = "c.Number")
+   class Number {
+       public synchronized void a() {
+           Tmp.sleep(1);
+           log.debug("1");
+       }
+   
+       public synchronized void b() {
+           log.debug("2");
+       }
+   }
+   
+   
+   public class Tmp {
+       public static void main(String[] args) {
+           Number n1 = new Number();
+           Number n2 = new Number();
+           new Thread(() -> n1.a()).start();
+           new Thread(() -> n2.b()).start();
+       }
+   
+       public static void sleep(int i){
+           try {
+               TimeUnit.SECONDS.sleep(i);
+           } catch (InterruptedException e) {
+               throw new RuntimeException(e);
+           }
+       }
+   }
+   ```
+
+   
+
+5. 情况五：t1的锁是`Number.class`，t2的锁是n1对象，锁不同，相当于没锁，结果同上：`2 1s后1`
+
+   ```java
+   @Slf4j(topic = "c.Number")
+   class Number {
+       public static synchronized void a() {
+           Tmp.sleep(1);
+           log.debug("1");
+       }
+   
+       public synchronized void b() {
+           log.debug("2");
+       }
+   }
+   
+   
+   public class Tmp {
+       public static void main(String[] args) {
+           Number n1 = new Number();
+           new Thread(() -> n1.a()).start();
+           new Thread(() -> n1.b()).start();
+       }
+   
+       public static void sleep(int i){
+           try {
+               TimeUnit.SECONDS.sleep(i);
+           } catch (InterruptedException e) {
+               throw new RuntimeException(e);
+           }
+       }
+   }
+   ```
+
+   - a() 是 static synchronized，锁对象是 Number.class（Class 对象，属于类本身）。
+   - b() 是实例方法 synchronized，锁对象是当前实例 this（这里就是 n1）。
+
+   所以 t1 调用 n1.a() 实际上拿的是**类锁** Number.class，t2 调用 n1.b() 拿的是**对象锁** n1。两把锁不同，互不影响，相当于没锁冲突。结果就是：
+
+   - t2 直接打印 2
+   - t1 先 sleep(1)，1 秒后打印 1
+
+   所以输出是：2 然后 1 秒后 1。
+
+   补充一句：static synchronized 无论用类名还是实例调用，锁都是 Number.class；多个实例也共用同一把类锁。
+
+   static synchronized，锁对象是 Number.class，怎么加了一个static静态就是类锁了？
+
+   因为 synchronized 必须绑定到“一个对象的监视器（monitor）”上。
+   实例方法有 this 可以当锁；**静态方法没有实例**，只能用“类对象”当锁，所以 JVM 规定：static synchronized 等价于
+
+   ```
+   synchronized (Number.class) {  // 方法体 } 
+   ```
+
+   也就是说加了 static，锁就从“实例锁”切换成“类锁”。
+
+   补充：Number.class 是类加载后生成的 Class 对象，同一个类加载器下只会有一个，所以所有实例都会竞争同一把锁。
+
+   
+
+6. 情况六：t1和t2的锁均为`Number.class`，`1s后12`或`2 1s后1`
+
+   ```java
+   @Slf4j(topic = "c.Number")
+   class Number {
+       public static synchronized void a() {
+           Tmp.sleep(1);
+           log.debug("1");
+       }
+   
+       public static synchronized void b() {
+           log.debug("2");
+       }
+   }
+   
+   
+   public class Tmp {
+       public static void main(String[] args) {
+           Number n1 = new Number();
+           new Thread(() -> n1.a()).start();
+           new Thread(() -> n1.b()).start();
+       }
+   
+       public static void sleep(int i){
+           try {
+               TimeUnit.SECONDS.sleep(i);
+           } catch (InterruptedException e) {
+               throw new RuntimeException(e);
+           }
+       }
+   }
+   ```
+
+7. 情况七：`2 1s后1`
+
+   ```java
+   @Slf4j(topic = "c.Number")
+   class Number {
+       public static synchronized void a() {
+           Tmp.sleep(1);
+           log.debug("1");
+       }
+   
+       public synchronized void b() {
+           log.debug("2");
+       }
+   }
+   
+   
+   public class Tmp {
+       public static void main(String[] args) {
+           Number n1 = new Number();
+           Number n2 = new Number();
+           new Thread(() -> n1.a()).start();
+           new Thread(() -> n2.b()).start();
+       }
+   
+       public static void sleep(int i){
+           try {
+               TimeUnit.SECONDS.sleep(i);
+           } catch (InterruptedException e) {
+               throw new RuntimeException(e);
+           }
+       }
+   }
+   ```
+
+8. 情况八：t1和t2的锁均为`Number.class`，与调用方n1、n2无关，结果`1s后12`或`2 1s后1`
+
+   ```java
+   @Slf4j(topic = "c.Number")
+   class Number {
+       public static synchronized void a() {
+           Tmp.sleep(1);
+           log.debug("1");
+       }
+   
+       public static synchronized void b() {
+           log.debug("2");
+       }
+   }
+   
+   
+   public class Tmp {
+       public static void main(String[] args) {
+           Number n1 = new Number();
+           Number n2 = new Number();
+           new Thread(() -> n1.a()).start();
+           new Thread(() -> n2.b()).start();
+       }
+   
+       public static void sleep(int i){
+           try {
+               TimeUnit.SECONDS.sleep(i);
+           } catch (InterruptedException e) {
+               throw new RuntimeException(e);
+           }
+       }
+   }
+   ```
+
+### 变量的线程安全分析
+
+#### 成员变量和静态变量是否线程安全？
+
+- 如果它们没有共享，则线程安全
+- 如果它们被共享了，根据它们的状态是否能改变，分为两种情况
+  - 如果只有读操作，则线程安全
+  - 如果有读写操作，则这段代码是临界区，需要考虑线程安全
+
+#### 局部变量是否线程安全
+
+- 通常情况下，方法内的局部变量是线程安全的，因为它们只能在方法内部访问，每个线程都有自己的栈帧，而局部变量就存放在栈帧内。
+
+- 但局部变量引用的对象未必是线程安全的
+
+  - 如果该对象没有逃离方法的作用域，那么它是线程安全的
+
+  - 如果该对象逃离了方法的作用范围，则需要考虑线程安全
+
+  - 详情可以参考这篇文章的2.2.1
+
+    JVM内存模型
+
+    https://cyborg2077.github.io/2023/03/27/JvmPart2/
+
+#### 局部变量线程安全分析
+
+- 示例代码
+
+  ```
+  public static void test1() {
+      int i = 10;
+      i++;
+  }
+  ```
+
+- 每个线程调用test1()方法时，局部变量i会在每个线程的栈帧内存中被创建多份，因此不存在共享，使用
+
+  ```
+  javap -v
+  ```
+
+  命令查看test1()的字节码
+
+  ```
+  public static void test1();
+    descriptor: ()V
+    flags: ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=1, locals=1, args_size=0
+         0: bipush        10                    // 将整数10推送到操作数栈顶。
+         2: istore_0                            // 将操作数栈顶的整数值存储到局部变量表的索引为0的位置（即将10存储到局部变量i） 
+         3: iinc          0, 1                  // 将局部变量表中索引为0的位置的整数值增加1。
+        Start  Length  Slot  Name   Signature
+            3       4     0     i   I
+  ```
+
+  
+
+- 局部变量的引用稍有不同，我们先来看一个成员变量的例子，method2和method3都是对成员变量的修改，一个是添加元素，一个是移除元素。
+
+  - 当多个线程执行的指令交错的时候，可能会出现list中没有元素，但是却执行了remove操作，此时就会报错
+
+    ```java
+    public class Test01 {
+        static final int THREAD_NUM = 2;
+        static final int LOOP_NUM = 200;
+    
+        public static void main(String[] args) {
+            ThreadUnsafe test = new ThreadUnsafe();
+            for (int i = 0; i < THREAD_NUM; i++) {
+                new Thread(() -> {
+                    test.method01(LOOP_NUM);
+                }, "Thread" + i).start();
+            }
+        }
+    }
+    
+    class ThreadUnsafe {
+        ArrayList<String> list = new ArrayList<>();
+    
+        public void method01(int loopNum) {
+            for (int i = 0; i < loopNum; i++) {
+                // 临界区，会发生竞态条件
+                method02();
+                method03();
+            }
+        }
+    
+        private void method02() {
+            list.add("1");
+        }
+    
+        public void method03() {
+            list.remove(0);
+        }
+    }
+    ```
+
+- 报错
+
+  ```
+  Exception in thread "Thread1" java.lang.IndexOutOfBoundsException: Index: 0, Size: 0
+  at java.util.ArrayList.rangeCheck(ArrayList.java:657)
+  at java.util.ArrayList.remove(ArrayList.java:496)
+  at cn.itcast.n6.ThreadUnsafe.method3(TestThreadSafe.java:35)
+  at cn.itcast.n6.ThreadUnsafe.method1(TestThreadSafe.java:26)
+  at cn.itcast.n6.TestThreadSafe.lambda$main$0(TestThreadSafe.java:14)
+  at java.lang.Thread.run(Thread.java:748)
+  ```
+
+- 分析：无论哪个线程中的method02或method03中，引用的都是同一个对象中的list成员变量
+  
+- 下面我们将list修改为局部变量
+
+  ```
+  class ThreadSafe {
+  
+      public void method01(int loopNum) {
+          ArrayList<String> list = new ArrayList<>();
+          for (int i = 0; i < loopNum; i++) {
+              // 临界区，会发生竞态条件
+              method02();
+              method03();
+          }
+      }
+  
+      private void method02(ArrayList<String> list) {
+          list.add("1");
+      }
+  
+      private void method03(ArrayList<String> list) {
+          list.remove(0);
+      }
+  }
+  ```
+
+- 此时无论运行多少次，也不会出现上述的问题了。因为此时list是局部变量，每个线程调用时会创建其不同的实例，没有共享
+  
+- 我们继续从方法访问修饰符来思考，如果将method02和method03修改为public方法，会不会造成线程安全问题？
+
+  1. 情况一：有其他线程调用method02和method03
+
+  2. 情况二：在情况一的基础上，添加ThreadSafe的子类，子类覆盖method03方法
+
+     ```
+     class ThreadSafe {
+     
+         public void method01(int loopNum) {
+             ArrayList<String> list = new ArrayList<>();
+             for (int i = 0; i < loopNum; i++) {
+                 // 临界区，会发生竞态条件
+                 method02(list);
+                 method03(list);
+             }
+         }
+     
+         private void method02(ArrayList<String> list) {
+             list.add("1");
+         }
+     
+         public void method03(ArrayList<String> list) {
+             list.remove(0);
+         }
+     }
+     
+     
+     class ThreadSafeSubClass extends ThreadSafe {
+         @Override
+         public void method03(ArrayList<String> list) {
+             new Thread(() -> {
+                 list.remove(0);
+             }).start();
+         }
+     }
+     ```
+
+  - 多运行几遍就会报错，原因是重写的method03方法将list共享到了新线程，造成两个线程都在修改list对象，从这个例子中可以看出private可以保护方法的线程安全的，限制子类不能覆盖它
+
+    ```
+    Exception in thread "Thread-957" java.lang.IndexOutOfBoundsException: Index: 0, Size: 0
+        at java.util.ArrayList.rangeCheck(ArrayList.java:659)
+        at java.util.ArrayList.remove(ArrayList.java:498)
+        at com.cyborg2077.demo01.ThreadSafeSubClass.lambda$method03$0(Test01.java:44)
+        at java.lang.Thread.run(Thread.java:750)
+    ```
+
+### 常见的线程安全类
+
+1. String
+2. Integer
+3. StringBuffer
+4. Random
+5. Vector
+6. Hashtable
+7. java.util.concurrent包下的类
+
+- 这里说它们是线程安全的是指，当多个线程调用它们同一个实例的某个方法时，是线程安全的，可以理解为
+
+  ```
+  Hashtable table = new Hashtable();
+  new Thread(() -> table.put("key", "value"), "t1").start();
+  new Thread(() -> table.put("key", "value"), "t2").start();
+  ```
+
+  虽然它们的每个方法都是原子的，但多个方法的组合不是原子的
+
+#### 线程安全类方法的组合
+
+- 分析以下代码是否线程安全
+
+  ```
+  Hashtable table = new Hashtable();
+  // 两个线程同时执行
+  if (table.get("key") == null) {
+      table.put("key", value);
+  }
+  ```
+
+- 在多线程下，可能会发生指令交错，线程T2的操作结果被线程T1的操作结果覆盖，导致数据不一致。
+
+  ```
+  T1：table.get("key") == null
+      T2：table.get("key") == null
+      T2：table.put("key", v2);
+  T1：table.put("key", v1);
+  ```
+
+#### 不可变类的线程安全性
+
+- 在Java中，String类和Integer类被设计为不可变类（Immutable Class），这意味着一旦创建了对象，其状态就不能被修改。这种不可变性使得String和Integer对象在多线程环境中是线程安全的，因为它们的状态不会发生变化，所以不会导致线程安全问题。
+  1. String类的线程安全性
+     - 字符串是不可变的，一旦创建就不能修改。任何对字符串的修改都会创建一个新的字符串对象，而不会修改原始字符串对象。
+     - 因为字符串不可变，所以多个线程可以同时访问同一个字符串对象，而不需要担心竞争条件或数据不一致的问题。
+  2. Integer类的线程安全性
+     - Integer类是一个包装类，用于封装int类型的值。它也是不可变的，一旦创建就不能修改
+     - 对于常见的整数值（-128 ~ 127），Java使用IntegerCache来重用Integer对象。这意味着多个线程同时访问这些整数值时，会得到相同的Integer对象
+     - 对于超出缓存范围的整数值，每个线程都会获得一个独立的Integer对象，因此不会存在竞态条件。
+
+#### 实例分析
+
+1. 例一
+
+   ```
+   public class MyServlet extends HttpServlet {
+       // 是否安全？否：Hashtable才是线程安全的，此map会被多个线程共享并访问到
+       Map<String,Object> map = new HashMap<>();
+       // 是否安全？是：字符串是不可变类，是线程安全的
+       String S1 = "...";
+       // 是否安全？是：理由同上
+       final String S2 = "...";
+       // 是否安全？否：会被共享，与map理由一致
+       Date D1 = new Date();
+       // 是否安全？否：final修饰符仅仅是将D2的引用值固定了，但还是可被修改的
+       final Date D2 = new Date();
+       public void doGet(HttpServletRequest request, HttpServletResponse response) {
+           // 使用上述变量
+       }
+   }
+   ```
+
+2. 例二
+
+   ```
+   public class MyServlet extends HttpServlet {
+       // 是否安全？否：doGet 方法会被多个线程并发调用。由于 userService 是一个共享的成员变量，多个线程同时调用 doGet 方法可能会导致并发访问问题。
+       private UserService userService = new UserServiceImpl();
+       public void doGet(HttpServletRequest request, HttpServletResponse response) {
+           userService.update(...);
+       }
+   }
+   public class UserServiceImpl implements UserService {
+       // 记录调用次数
+       private int count = 0;
+   
+       public void update() {
+       // ...
+           count++;
+       }
+   }
+   ```
+
+- 可以将UserService对象的创建放在doGet内来完成，这样可以保证线程安全
+
+  ```
+  public void doGet(HttpServletRequest request, HttpServletResponse response) {
+      UserService userService = new UserServiceImpl();
+      userService.update(...);
+  }
+  ```
+
+1. 例三
+
+- Spring中的对象，不加
+
+  ```
+  @Scope(""prototype)
+  ```
+
+  注解声明的话，默认都是单例的，既然对象都是单例的，那么这里的start属性也是共享的，所以是线程不安全的
+
+  ```
+  @Aspect
+  @Component
+  public class MyAspect {
+      // 是否安全？
+      private long start = 0L;
+      @Before("execution(* *(..))")
+      public void before() {
+          start = System.nanoTime();
+      }
+  
+      @After("execution(* *(..))")
+      public void after() {
+          long end = System.nanoTime();
+          System.out.println("cost time:" + (end-start));
+      }
+  }
+  ```
+
+- 我们可以使用环绕通知，将start作为一个局部变量，从而避免线程安全问题
+
+  ```
+  @Aspect
+  @Component
+  public class MyAspect {
+      @Around("execution(* *(..))")
+      public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
+          long start = System.nanoTime();
+          Object result = joinPoint.proceed();
+          long end = System.nanoTime();
+          System.out.println("cost time: " + (end - start));
+          return result;
+      }
+  }
+  ```
+
+1. 例四，从下往上看
+
+   ```
+   public class MyServlet extends HttpServlet {
+       // 是否安全？同下，也是不可变的
+       private UserService userService = new UserServiceImpl();
+       public void doGet(HttpServletRequest request, HttpServletResponse response) {
+           userService.update(...);
+       }
+   }
+   
+   public class UserServiceImpl implements UserService {
+       // 是否安全？是：虽然UserDao是成员变量，但是里面没有东西可以改，是线程安全的，类似于无状态不可变
+       private UserDao userDao = new UserDaoImpl();
+       public void update() {
+           userDao.update();
+       }
+   }
+   
+   public class UserDaoImpl implements UserDao {
+       public void update() {
+           String sql = "update user set password = ? where username = ?";
+           // 是否安全？是：没有成员变量，即使有多个线程来访问，也什么都改不了，只读
+           try (Connection conn = DriverManager.getConnection("","","")){
+           // ...
+           } catch (Exception e) {
+           // ...
+           }
+       }
+   }
+   ```
+
+2. 例五
+
+   ```
+   public class MyServlet extends HttpServlet {
+       // 是否安全？否
+       private UserService userService = new UserServiceImpl();
+       public void doGet(HttpServletRequest request, HttpServletResponse response) {
+           userService.update(...);
+       }
+   }
+   
+   public class UserServiceImpl implements UserService {
+       // 是否安全？否，其中的成员变量被共享，可被修改
+       private UserDao userDao = new UserDaoImpl();
+       public void update() {
+           userDao.update();
+       }
+   }
+   
+   public class UserDaoImpl implements UserDao {
+       // 是否安全？否：Connection对象作为成员变量，会被共享
+       private Connection conn = null;
+       public void update() throws SQLException {
+           String sql = "update user set password = ? where username = ?";
+           conn = DriverManager.getConnection("","","");
+           // ...
+           conn.close();
+       }
+   }
+   ```
+
+3. 例六
+
+   ```
+   public class MyServlet extends HttpServlet {
+       private UserService userService = new UserServiceImpl();
+       public void doGet(HttpServletRequest request, HttpServletResponse response) {
+           userService.update(...);
+       }
+   }
+   
+   public class UserServiceImpl implements UserService {
+       // UserDao是作为局部变量被创建的
+       public void update() {
+           UserDao userDao = new UserDaoImpl();
+           userDao.update();
+       }
+   }
+   
+   public class UserDaoImpl implements UserDao {
+       // 是否安全？是：虽然Connection是成员变量，但是UserDao是在update()方法中作为局部变量创建的，故这里的Connection都是每个线程独立创建的，不会被共享
+       private Connection = null;
+       public void update() throws SQLException {
+           String sql = "update user set password = ? where username = ?";
+           conn = DriverManager.getConnection("","","");
+           // ...
+           conn.close();
+       }
+   }
+   ```
+
+4. 例七
+
+   ```java
+   public abstract class Test {
+       public void bar() {
+           // 是否安全？否：虽然sdf方法是局部变量，但是sdf对象会作为参数被传递给抽象方法foo()，其子类可能会对foo()方法中的sdf做修改，相当于sdf对象逃离了方法作用范围，线程不安全
+           SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+           foo(sdf);
+       }
+   
+       public abstract foo(SimpleDateFormat sdf);
+   
+       public static void main(String[] args) {
+           new Test().bar();
+       }
+   }
+   ```
+
+- 其中foo的行为是不确定的，可能会对sdf做修改
+
+  ```java
+  public void foo(SimpleDateFormat sdf) {
+      String dateStr = "1999-10-11 00:00:00";
+      for (int i = 0; i < 20; i++) {
+          new Thread(() -> {
+              try {
+                  sdf.parse(dateStr);
+              } catch (ParseException e) {
+                  e.printStackTrace();
+              }
+          }).start();
+      }
+  }   
+  ```
+
+### 习题
+
+#### 卖票练习
+
+- 测试下面的卖票代码是否存在线程安全问题，并尝试改正
+
+  ```java
+  class TicketWindow {
+      private int count;
+  
+      public TicketWindow(int count) {
+          this.count = count;
+      }
+  
+      public int getCount() {
+          return count;
+      }
+  
+      /**
+       * 卖票
+       * @param amount 预购买的张数
+       * @return 实际卖的张数，余票不足为0 
+       */
+      public int sell(int amount) {
+          if (this.count >= amount) {
+              this.count -= amount;
+              return amount;
+          } else
+              return 0;
+      }
+  }
+  ```
+
+- 我们来实际测试一下
+
+  ```java
+  @Slf4j(topic = "c.ExerciseSell")
+  public class ExerciseSell {
+      public static void main(String[] args) {
+          TicketWindow window = new TicketWindow(1000);
+          ArrayList<Thread> list = new ArrayList<>();
+          List<Integer> sellCount = new Vector<>();
+          for (int i = 0; i < 2000; i++) {
+              Thread thread = new Thread(() -> {
+                  int count = window.sell(new Random().nextInt(5) + 1);
+                  sellCount.add(count);
+              });
+              list.add(thread);
+              thread.start();
+          }
+          list.forEach((t) -> {
+              try {
+                  t.join();
+              } catch (InterruptedException e) {
+                  e.printStackTrace();
+                  throw new RuntimeException(e);
+              }
+          });
+          log.debug("卖出：{}张", sellCount.stream().mapToInt(n -> n.intValue()).sum());
+          log.debug("剩余：{}张", window.getCount());
+      }
+  }
+  ```
+
+- 结果发生了超卖现象，原因是在售票方法处，没有加锁，导致多个线程可能同时进来修改票数
+
+  ```
+  16:37:37.959 c.ExerciseSell [main] - 卖出：1008张
+  16:37:37.962 c.ExerciseSell [main] - 剩余：0张
+  ```
+
+- 解决方案是给sell()方法加锁
+
+  ```java
+  public synchronized int sell(int amount) {
+      if (this.count >= amount) {
+          this.count -= amount;
+          return amount;
+      } else
+          return 0;
+  }
+  ```
+
+- 结果
+
+  ```
+  17:55:15.759 c.ExerciseSell [main] - 卖出：1000张
+  17:55:15.765 c.ExerciseSell [main] - 剩余：0张
+  ```
+
+#### 转账练习
+
+- 测试下面代码是否存在线程安全问题，并尝试改正
+
+  ```java
+  @Data
+  @AllArgsConstructor
+  class Account {
+      private int money;
+  
+      public void transfer(int amount, Account target) {
+          if (this.money >= amount) {
+              this.setMoney(money - amount);
+              target.setMoney(target.getMoney() + amount);
+          }
+      }
+  }
+  ```
+
+- 测试代码
+
+  ```java
+  @Slf4j(topic = "c.ExerciseTransfer")
+  public class ExerciseTransfer {
+      public static void main(String[] args) throws InterruptedException {
+          Account a = new Account(1000);
+          Account b = new Account(1000);
+          Thread t1 = new Thread(() -> {
+              for (int i = 0; i < 100; i++) {
+                  a.transfer(new Random().nextInt(1000), b);
+              }
+          }, "t1");
+          Thread t2 = new Thread(() -> {
+              for (int i = 0; i < 100; i++) {
+                  b.transfer(new Random().nextInt(1000), a);
+              }
+          }, "t1");
+          t1.start();
+          t2.start();
+          t1.join();
+          t2.join();
+          log.debug("两人总金额：{}", a.getMoney() + b.getMoney());
+      }
+  }
+  ```
+
+- 结果如下，转来转去，钱还转少了
+
+  （身为银行，收点手续费怎么啦）
+
+  ```
+  18:07:44.726 c.ExerciseTransfer [main] - 两人总金额：1436
+  ```
+
+- 分析：这里的共享变量是
+
+  money，临界区则是transfer()方法，该方法中对money进行了修改，但是没有加锁，但是直接在方法上加synchronized是没用的，这样相当于使用this当前对象来作为锁，如果多个线程同时调用transfer()方法，那么每个线程会获取不同的锁，等于没加锁
+
+  ```java
+  public void transfer(int amount, Account target) {
+      synchronized (this) {
+          if (this.money >= amount) {
+              this.setMoney(money - amount);
+              target.setMoney(target.getMoney() + amount);
+          }
+      }
+  }
+  ```
+
+- 正确的做法是使用
+
+  相同的锁来对共享资源进行同步，这里可以使用Account.class来作为锁
+
+  ```java
+  public void transfer(int amount, Account target) {
+      synchronized (Account.class) {
+          if (this.money >= amount) {
+              this.setMoney(money - amount);
+              target.setMoney(target.getMoney() + amount);
+          }
+      }
+  }
+  ```
+  
+  ### 重新理解线程状态转换
+  
+  - 假设有Thread t
+  
+    1. ```
+       NEW -> RUNNABLE
+       ```
+  
+       - 当调用t.start()方法时，由`NEW -> RUNNABLE`
+  
+    2. ```
+       RUNNABLE <-> WAITING
+       ```
+  
+       - t线程使用`synchronized(obj)`获取对象锁之后
+  
+       - 调用`obj.wait()`方法时，t线程由`RUNNABLE -> WAITING`
+  
+       - 调用obj.notify()、obj.notifyAll()
+  
+         、t.interrupt()时
+  
+         - 竞争锁成功，t线程由`WAITING -> RUNNABLE`
+         - 竞争锁失败，t线程由`WAITING -> BLOCKED`
+  
+    3. ```
+       RUNNABLE <-> WAITING
+       ```
+  
+       - 当线程调用t.join()方法时，当前线程会从
+  
+         ```
+         RUNNABLE -> WAITING
+         ```
+  
+         - 注意当前线程是在t线程对象的监视器上等待
+  
+       - t线程运行结束，或调用了当前线程的`interrupt()`时，当前线程从`WAITING -> RUNNABLE`
+  
+    4. ```
+       RUNNABLE <-> WAITING
+       ```
+  
+       - 当前线程调用`LockSupport.park()`方法，会让当前线程从`RUNNABLE -> WAITING`
+       - 调用LockSupport.unpark(目标线程)，会让目标现成从`WAITING -> RUNNABLE`
+  
+    5. ```
+       RUNNABLE <-> TIMED_WAITING
+       ```
+  
+       - t线程用synchronized(obj)获取了对象锁后
+         - 调用`obj.wait(long n)`方法时，t线程从`RUNNABLE -> TIMED_WAITING`
+         - t线程等待超过了n毫秒时，或者调用obj.notify()、obj.notifyAll()、t.interrupt()时
+           - 竞争成功，t线程从`TIMED_WAITING -> RUNNABLE`
+           - 竞争失败，t线程从`TIMED_WAITING -> BLOCKED`
+  
+    6. ```
+       RUNNABLE <-> TIMED_WAITING
+       ```
+  
+       - 当前线程调用`t.join(long n)`方法时，当前线程从`RUNNABLE -> TIMED_WAITING`
+       - 当前线程等待超过了n毫秒，或t线程运行结束，或调用了当前线程的`interrupt()`方法时，当前线程从`TIMED_WAITING -> RUNNABLE`
+  
+    7. ```
+       RUNNABLE <-> TIMED_WAITING
+       ```
+  
+       - 当前线程调用了`Thread.sleep(long n)`，当前线程从`RUNNABLE -> TIMED_WAITING`
+       - 当前线程等待超过了n毫秒，当前线程从`TIMED_WAITING -> RUNNABLE`
+  
+    8. ```
+       RUNNABLE <-> TIMED_WAITING
+       ```
+  
+       - 当前线程调用`LockSupport.parkNanos(long nanos)`或`LockSupport.parkUntil(long millis)`时，当前线程从`RUNNABLE -> TIMED_WAITING`
+       - 调用LockSupport.unpark(目标现成)或调用了线程的interrupt()或等待超时，当前线程从`TIMED_WAITING -> RUNNABLE`
+  
+    9. ```
+       RUNNABLE <-> BLOCKED
+       ```
+  
+       - t线程用synchronized(obj)获取锁时，如果竞争失败，会从`RUNNABLE -> BLOCKED`
+       - 持有obj锁的线程的同步代码块执行完毕，会唤醒该对象上所有`BLOCKED`的线程重新竞争，如果其中t线程竞争成功，从`BLOCKED -> RUNNABLE`，其它失败的线程仍然`BLOCKED`
+  
+    10. RUNNABLE <-> TERMINATED
+  
+        - 当前线程所有代码运行完毕，进入TERMINATED
 
 ***
 
@@ -1097,7 +2483,7 @@ LocalVariableTable:
 
 ##### 轻量级锁
 
-一个对象有多个线程要加锁，但加锁的时间是错开的（没有竞争），可以使用轻量级锁来优化，轻量级锁对使用者是透明的（不可见）
+**一个对象有多个线程要加锁，但加锁的时间是错开的（没有竞争），可以使用轻量级锁来优化，轻量级锁对使用者是透明的（不可见）**
 
 可重入锁：线程可以进入任何一个它已经拥有的锁所同步着的代码块，可重入锁最大的作用是**避免死锁**
 
@@ -1488,19 +2874,77 @@ class TestLiveLock {
 
 饥饿：一个线程由于优先级太低，始终得不到 CPU 调度执行，也不能够结束
 
+**线程池饥饿/死锁复现**
+
+下面的代码会稳定卡住，表现为日志只打印到“做菜...”，程序不再向前推进：
+
+```java
+import java.util.concurrent.*;
+
+public class ThreadStarvationDemo {
+    static final ExecutorService waiterPool = Executors.newFixedThreadPool(1);
+    static final ExecutorService cookPool = Executors.newFixedThreadPool(1);
+
+    public static void main(String[] args) {
+        waiterPool.execute(() -> {
+            log("处理点餐...");
+            Future<String> f = cookPool.submit(() -> {
+                log("做菜...");
+                // 关键：反向提交到 waiterPool 并等待
+                Future<String> back = waiterPool.submit(() -> {
+                    log("上菜准备...");
+                    return "摆盘完成";
+                });
+                return "菜品就绪 + " + get(back);
+            });
+            log("上菜: " + get(f));
+        });
+    }
+
+    static String get(Future<String> f) {
+        try {
+            return f.get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    static void log(String msg) {
+        System.out.println(Thread.currentThread().getName() + " | " + msg);
+    }
+}
+```
+
+现象：`waiterPool` 打印“处理点餐...”，`cookPool` 打印“做菜...”，随后程序挂住不退出。
+
+原因解析：
+
+1. `waiterPool` 只有 1 个线程，执行“处理点餐...”后调用 `f.get()` 阻塞，唯一线程被占住。
+2. `cookPool` 只有 1 个线程，执行“做菜...”后又把任务提交回 `waiterPool` 并调用 `back.get()` 阻塞。
+3. `waiterPool` 的线程被 `f.get()` 占住，没有空闲线程来执行 `back`，导致 `cookPool` 的线程一直等。
+4. 两个线程彼此等待，所有可运行线程都被阻塞，形成“线程池饥饿/死锁”。
+
+注意：如果去掉“反向提交到 `waiterPool` 并等待”的那几行，`waiterPool` 的代码本身不会死锁；真正的问题是“在**容量过小**的线程池里**阻塞等待**同一链路上的任务”。
+
+**常见修复方式**
+
+1. 避免在线程池内阻塞等待依赖任务，改为异步链式组合（如 `CompletableFuture.thenCompose/thenAccept`），把 `get/join` 放在主线程或非池内线程。
+2. 将阻塞/耗时任务放入独立的 `blocking` 线程池，避免互相依赖导致线程耗尽。
+3. 临时缓解：增大线程池容量（例如 2 或更多），但这只是缓解，不是根治。
+
 
 
 ***
 
 
 
-### wait-ify
+### wait-ify 设计模式 固定运行顺序
 
 #### 基本使用
 
 需要获取对象锁后才可以调用 `锁对象.wait()`，notify 随机唤醒一个线程，notifyAll 唤醒所有线程去竞争 CPU
 
-Object 类 API：
+**Object 类 API：**
 
 ```java
 public final void notify():唤醒正在等待对象监视器的单个线程。
@@ -1514,7 +2958,7 @@ public final native void wait(long timeout):有时限的等待, 到n毫秒后结
 对比 sleep()：
 
 * 原理不同：sleep() 方法是属于 Thread 类，是线程用来控制自身流程的，使此线程暂停执行一段时间而把执行机会让给其他线程；wait() 方法属于 Object 类，用于线程间通信
-* 对**锁的处理机制**不同：调用 sleep() 方法的过程中，线程不会释放对象锁，当调用 wait() 方法的时候，线程会放弃对象锁，进入等待此对象的等待锁定池（不释放锁其他线程怎么抢占到锁执行唤醒操作），但是都会释放 CPU
+* 对**锁的处理机制**不同：调用 sleep() 方法的过程中，线程不会释放对象锁，**当调用 wait() 方法的时候，线程会放弃对象锁**，进入等待此对象的等待锁定池（不释放锁其他线程怎么抢占到锁执行唤醒操作），但是都会释放 CPU
 * 使用区域不同：wait() 方法必须放在**同步控制方法和同步代码块（先获取锁）**中使用，sleep() 方法则可以放在任何地方使用
 
 底层原理：
@@ -1608,7 +3052,21 @@ public class demo {
 
 
 
+唤醒所有线程，但是小南依然不符合条件，继续等待。将此种方式封装为一个模板，如下
 
+```JAVA
+synchronized(lock) {
+    while(条件不成立) {
+        lock.wait()
+    }
+    // 干活
+}
+
+// 另一个线程
+synchronized(lock) {
+    lock.notifyAll();
+}
+```
 
 ****
 
@@ -1875,7 +3333,36 @@ class GuardedObject {
 }
 ```
 
+每个“收信人（People）”创建一个自己的“信箱（GuardedObject）”，然后阻塞等待；
+“邮递员（Postman）”根据 id 把信投到对应信箱并唤醒等待的线程。
 
+通俗拆解：
+
+**1）main 做了两件事**
+
+- 先启动 3 个 People 线程（相当于 3 个收信人去“开户”并等待）
+- 主线程 sleep 1 秒后，遍历所有信箱 id，给每个 id 启动一个 Postman 线程投递邮件
+
+**2）People（收信人）逻辑**
+
+- Mailboxes.createGuardedObject()：创建一个 GuardedObject（信箱），并放入 boxes 里
+- 打印“开始收信 id”
+- guardedObject.get(5000)：最多等 5 秒拿到邮件（超时可能拿到 null）
+- 打印“收到信 id + 内容”
+
+**3）Postman（邮递员）逻辑**
+
+- 用 id 去 Mailboxes.getGuardedObject(id) 拿到信箱（并从 map 中移除）
+- 打印开始送信
+- guardedObject.complete(mail)：把邮件放进去，并唤醒等待的收信人
+
+**4）Mailboxes（信箱管理中心）**
+
+- boxes：id -> GuardedObject 的映射（Hashtable 线程安全）
+- generateId()：同步生成唯一 id
+- createGuardedObject()：创建信箱并登记到 boxes
+- getGuardedObject(id)：邮递员取走对应信箱（取到就从 map 删除）
+- getIds()：返回当前所有信箱 id，供邮递员分派
 
 ****
 
@@ -1908,7 +3395,40 @@ public static void main(String[] args) throws InterruptedException {
 }
 ```
 
+**1）线程 t1（等待者）**
 
+- 一直循环。
+
+- 每轮循环先
+
+  LockSupport.park()
+
+  - 如果没有“许可”，t1 就会阻塞（暂停）。
+  - 如果有“许可”，t1 立刻继续，并把许可消耗掉。
+
+- 继续往下打印 "1"。
+
+**2）线程 t2（发放者）**
+
+- 一直循环。
+
+- 每轮先打印 "2"。
+
+- 然后
+
+  LockSupport.unpark(t1)
+
+  给 t1 发放一个“许可”。
+
+  - 即使多次连续 unpark，许可最多只能是 1 个，不会累加。
+
+- sleep(500) 让自己每 500ms 发一次许可。
+
+**运行结果的直观感觉**
+
+- t2 会不断打印 2，大约每 500ms 打一次。
+- t1 只要拿到许可就打印一次 1，通常也是每 500ms 打一次。
+- 但是 t1 必须“先被允许”才能继续跑。
 
 ***
 
@@ -1921,7 +3441,7 @@ public static void main(String[] args) throws InterruptedException {
 ```java
 public class day2_14 {
     public static void main(String[] args) throws InterruptedException {
-        AwaitSignal awaitSignal = new AwaitSignal(5);
+//创建一个共享锁 awaitSignal（继承了 ReentrantLock）。
         Condition a = awaitSignal.newCondition();
         Condition b = awaitSignal.newCondition();
         Condition c = awaitSignal.newCondition();
@@ -1969,7 +3489,295 @@ class AwaitSignal extends ReentrantLock {
 }
 ```
 
+**整体目标**
+3 个线程分别负责打印 a、b、c，并且必须严格按 **a -> b -> c -> a...** 顺序循环 5 次。
 
+------
+
+1）主线程做了什么
+
+```
+AwaitSignal awaitSignal = new AwaitSignal(5); Condition a = awaitSignal.newCondition(); Condition b = awaitSignal.newCondition(); Condition c = awaitSignal.newCondition(); 
+```
+
+- 创建一个共享锁 awaitSignal（继承了 ReentrantLock）。
+- 创建 3 个条件变量：a、b、c，分别控制三个线程的等待/唤醒。
+
+然后启动 3 个线程：
+
+- 线程1调用 print("a", a, b)
+- 线程2调用 print("b", b, c)
+- 线程3调用 print("c", c, a)
+
+最后主线程：
+
+```
+Thread.sleep(1000); awaitSignal.lock(); try {    a.signal(); } finally {    awaitSignal.unlock(); } 
+```
+
+- 等 1 秒确保三个线程都进入等待状态。
+- 手动唤醒 a 条件，让打印从 a 开始。
+
+------
+
+2）print 方法逻辑
+
+```
+public void print(String str, Condition condition, Condition next) 
+```
+
+意思是：
+**每次只有被唤醒的线程才能打印，然后唤醒下一个线程。**
+
+循环 5 次（loopNumber）：
+
+- lock() 获取锁
+- condition.await() 等待自己对应的条件被唤醒
+- 打印自己负责的字符（a/b/c）
+- next.signal() 唤醒下一个线程
+- unlock() 释放锁
+
+------
+
+3）执行过程示意
+
+1. 三个线程都在各自的 condition.await() 里阻塞
+2. 主线程 a.signal() → 唤醒打印 a 的线程
+3. a 线程打印 **a**，然后 signal 唤醒 b
+4. b 线程打印 **b**，唤醒 c
+5. c 线程打印 **c**，唤醒 a
+6. 循环 5 次 → 输出 abcabcabcabcabc
+
+------
+
+4）关键点
+
+- **Condition 必须配合同一把 Lock 使用**，所以 AwaitSignal 继承 ReentrantLock。
+- **await 会释放锁**，被唤醒后会重新竞争锁再继续。
+- signal 唤醒的是等待在同一个 Condition 上的线程。
+
+------
+
+一句话总结：
+**三个线程各自等待自己的 Condition，被唤醒后打印一个字母，并唤醒下一个，形成 a→b→c 的循环打印。**
+
+
+
+
+
+- 使用wait notify来解决
+
+  - SyncWaitNotify
+
+    
+
+  ```java
+  /**
+   * 输出内容     等待标记        下一个标记
+   *   a          1               2
+   *   b          2               3
+   *   c          3               1
+   */
+  @Slf4j(topic = "c.SyncWaitNotify")
+  public class SyncWaitNotify {
+      // 等待标识
+      private int flag;
+      // 循环次数
+      private int loopNum;
+  
+      public SyncWaitNotify(int flag, int loopNum) {
+          this.flag = flag;
+          this.loopNum = loopNum;
+      }
+  
+      /**
+       *
+       * @param str       输出内容
+       * @param waitFlag  等待标记
+       * @param nextFlag  下一个标记
+       */
+      public void print(String str, int waitFlag, int nextFlag) {
+          for (int i = 0; i < loopNum; i++) {
+  
+              synchronized (this) {
+                  while (flag != waitFlag) {
+                      try {
+                          this.wait();
+                      } catch (InterruptedException e) {
+                          throw new RuntimeException(e);
+                      }
+                  }
+                  log.debug(str);
+                  flag = nextFlag;
+                  this.notifyAll();
+              }
+          }
+      }
+  }
+  ```
+
+  
+
+- 使用await和signal来解决
+
+  ```java
+  public class SyncAwaitSignal {
+      public static void main(String[] args) {
+          AwaitSignal awaitSignal = new AwaitSignal(5);
+          Condition a = awaitSignal.newCondition();
+          Condition b = awaitSignal.newCondition();
+          Condition c = awaitSignal.newCondition();
+          new Thread(() -> {
+              awaitSignal.print("a", a, b);
+          }, "t1").start();
+          new Thread(() -> {
+              awaitSignal.print("b", b, c);
+          }, "t2").start();
+          new Thread(() -> {
+              awaitSignal.print("c", c, a);
+          }, "t3").start();
+  
+          awaitSignal.start(a);
+      }
+  }
+  
+  @Slf4j(topic = "c.AwaitSignal")
+  class AwaitSignal extends ReentrantLock {
+  
+      private int loopNum;
+  
+      public AwaitSignal(int loopNum) {
+          this.loopNum = loopNum;
+      }
+  
+      public void print(String str, Condition current, Condition next) {
+          for (int i = 0; i < loopNum; i++) {
+              this.lock();
+              try {
+                  // 每个线程都先进自己的休息室等待
+                  current.await();
+                  log.debug(str);
+                  // 叫醒下一个
+                  next.signal();
+              } catch (InterruptedException e) {
+                  throw new RuntimeException(e);
+              } finally {
+                  this.unlock();
+              }
+          }
+      }
+  
+      public void start(Condition condition) {
+          this.lock();
+          try {
+              condition.signal();
+          } finally {
+              this.unlock();
+          }
+      }
+  }
+  ```
+
+- 使用Park和Unpark来解决
+
+  ```java
+  public class SyncParkUnpark {
+      static Thread t1;
+      static Thread t2;
+      static Thread t3;
+  
+      public static void main(String[] args) {
+          ParkUnpark parkUnpark = new ParkUnpark(5);
+          t1 = new Thread(() -> {
+              parkUnpark.print("a", t2);
+          }, "t1");
+          t2 = new Thread(() -> {
+              parkUnpark.print("b", t3);
+  
+          }, "t2");
+          t3 = new Thread(() -> {
+              parkUnpark.print("c", t1);
+          }, "t3");
+  
+          t1.start();
+          t2.start();
+          t3.start();
+  
+          LockSupport.unpark(t1);
+      }
+  }
+  
+  @Slf4j(topic = "c.ParkUnpark")
+  class ParkUnpark {
+      private int loopNum;
+  
+      public ParkUnpark(int loopNum) {
+          this.loopNum = loopNum;
+      }
+  
+      public void print(String str, Thread next) {
+          for (int i = 0; i < loopNum; i++) {
+              LockSupport.park();
+              log.debug(str);
+              LockSupport.unpark(next);
+          }
+      }
+  }
+  ```
+
+  ### wait/notify，await/signal，park/unpark区别
+
+  这三种方法都能实现“按顺序循环打印”，区别在于**等待/唤醒的机制**、**依赖的锁**、**唤醒精确度**、**信号是否会丢**、**实现复杂度**。
+
+  **核心差别一览**
+
+  - wait/notify：依赖 synchronized 的对象监视器；必须配合共享条件（flag）循环判断；notifyAll 常用但会“唤醒过多线程”
+  - await/signal：依赖 ReentrantLock；可用多个 Condition 实现**精确唤醒**；结构更清晰
+  - park/unpark：不依赖锁；用“许可”唤醒线程；可以先 unpark 再 park，不易丢信号
+
+  ------
+
+  **1）wait/notify（基于对象监视器）**
+
+  - **必须在 synchronized 内调用**，否则抛异常
+  - 等待条件必须用 while 防止虚假唤醒
+  - notify 只唤醒一个不确定线程；常用 notifyAll，但会造成**无效唤醒**
+  - 信号容易“丢”（如果没有线程在 wait，notify 无效果）
+  - 代码简洁但容易写错
+
+  适合：简单场景、单条件协作，老版本并发写法
+
+  ------
+
+  **2）await/signal（基于 Lock + Condition）**
+
+  - 更现代的方式，和 ReentrantLock 搭配
+  - **可以有多个 Condition**（本例 a/b/c），每个线程只等自己的条件
+  - **精确唤醒下一个线程**，不会无效唤醒
+  - 也要用 while 防虚假唤醒
+  - 结构更清晰，可扩展性更好
+
+  适合：多条件、多线程协作，控制更精细
+
+  ------
+
+  **3）park/unpark（基于“许可”）**
+
+  - 不依赖锁，机制更底层
+  - unpark 可以先调用，**许可会保留 1 个**，避免信号丢失
+  - park 可能被“虚假唤醒”，仍需配合条件判断
+  - 需要你自己保证顺序与线程关系，出错更隐蔽
+  - 常用于构建更底层的同步工具（AQS、线程池）
+
+  适合：底层并发组件、控制粒度更底层的场景
+
+  ------
+
+  **简单总结（怎么选）**
+
+  - 只想快速实现：wait/notify
+  - 线程多、条件多：await/signal 更稳
+  - 不想依赖锁、要更底层控制：park/unpark
 
 ***
 
@@ -2142,7 +3950,118 @@ final class Message {
 }
 ```
 
+### park & unpark
 
+- 它们是LockSupport类中的方法
+
+  ```
+  // 暂停当前线程
+  LockSupport.park();
+  // 回复某个线程的运行
+  LockSupport.unpark(暂停线程对象);
+  ```
+
+- 先park再unpark
+
+  
+
+```java
+@Slf4j(topic = "c.TestPark")
+public class Test01 {
+    public static void main(String[] args) throws InterruptedException {
+        Thread t1 = new Thread(() -> {
+            log.debug("start ..");
+
+            log.debug("park ..");
+            LockSupport.park();
+
+            log.debug("resume ..");
+        }, "t1");
+        t1.start();
+
+        Thread.sleep(1000);
+        log.debug("unpark ..");
+        LockSupport.unpark(t1);
+    }
+}
+```
+
+- 输出
+
+  ```
+  20:11:23.497 c.TestPark [t1] - start ..
+  20:11:23.500 c.TestPark [t1] - park ..
+  20:11:24.496 c.TestPark [main] - unpark ..
+  20:11:24.496 c.TestPark [t1] - resume ..
+  
+  ```
+
+  先unpark再park
+
+```java
+@Slf4j(topic = "c.TestPark")
+public class Test01 {
+    public static void main(String[] args) throws InterruptedException {
+        Thread t1 = new Thread(() -> {
+            log.debug("start ..");
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            log.debug("park ..");
+            LockSupport.park();
+
+            log.debug("resume ..");
+        }, "t1");
+        t1.start();
+
+        Thread.sleep(1000);
+        log.debug("unpark ..");
+        LockSupport.unpark(t1);
+    }
+}
+```
+
+ 
+
+```
+21:36:34.445 c.TestPark [t1] - start ..
+21:36:35.445 c.TestPark [main] - unpark ..
+21:36:36.447 c.TestPark [t1] - park ..
+21:36:36.447 c.TestPark [t1] - resume ..
+```
+
+- 从结果中看到，我们先执行unpark再执行park，线程依然不会被阻塞，这是为什么呢？
+
+  - 继续往下看`park & unpark`的原理
+
+    - 与Object的
+
+      ```
+      wait & notify
+      ```
+
+      对比
+
+      - wait、notify、notifyAll必须配合Object Monitor一起使用，而park、unpark不必
+      - `park & unpark`是以线程为单位来阻塞和唤醒线程的，而notify只能随机唤醒一个等待中的线程，notifyAll是唤醒所有等待线程，不精确
+      - `park & unpark`可以先unpark，而`wait & notify`只能不能先notify
+
+    ### 原理之park & unpark
+
+    - 每个线程都有自己的一个Parker对象，由三部分组成
+
+      _counter、_cond和_mutex，打个比喻
+
+      - 线程就像一个旅人，Parker就像他随身携带的背包，`_cond`就好比背包中的帐篷，`_counter`就好比背包中的备用干粮(0为耗尽，1为充足)
+      - 调用park就是要看需不需要停下来休息
+        - 如果备用干粮耗尽，那么就钻进帐篷休息
+        - 如果备用干粮充足，那么就不需要停留，继续前进
+      - 调用unpark，就好比令干粮充足
+        - 如果此时还在帐篷，那就唤醒他继续前进
+        - 如果此时线程还在运行，那么他下次调用park的时候，仅消耗掉备用干粮，不需要停留继续前进
+          - 但是由于背包有限，多次调用unpark仅会补充一份备用干粮
 
 ***
 
@@ -2252,7 +4171,7 @@ Java 内存模型定义了 8 个操作来完成主内存和工作内存的交互
 
 可见性：是指当多个线程访问同一个变量时，一个线程修改了这个变量的值，其他线程能够立即看得到修改的值
 
-存在不可见问题的根本原因是由于缓存的存在，线程持有的是共享变量的副本，无法感知其他线程对于共享变量的更改，导致读取的值不是最新的。但是 final 修饰的变量是**不可变**的，就算有缓存，也不会存在不可见的问题
+**存在不可见问题的根本原因是由于缓存的存在**，线程持有的是共享变量的副本，无法感知其他线程对于共享变量的更改，导致读取的值不是最新的。但是 final 修饰的变量是**不可变**的，就算有缓存，也不会存在不可见的问题
 
 main 线程对 run 变量的修改对于 t 线程不可见，导致了 t 线程无法停止：
 
@@ -2456,7 +4375,7 @@ MESI（Modified Exclusive Shared Or Invalid）是一种广泛使用的**支持�
 
 
 
-### volatile
+### volatile（易变关键字）
 
 #### 同步机制
 
@@ -2472,7 +4391,6 @@ synchronized 无法禁止指令重排和处理器优化，为什么可以保证�
 
 * 加了锁之后，只能有一个线程获得到了锁，获得不到锁的线程就要阻塞，所以同一时间只有一个线程执行，相当于单线程，由于数据依赖性的存在，单线程的指令重排是没有问题的
 * 线程加锁前，将**清空工作内存**中共享变量的值，使用共享变量时需要从主内存中重新读取最新的值；线程解锁前，必须把共享变量的最新值**刷新到主内存**中（JMM 内存交互章节有讲）
-
 
 
 
@@ -2499,7 +4417,7 @@ volatile 修饰的变量，可以禁用指令重排
 
   执行顺序是：1 2 3 4、2 1 3 4、1 3 2 4
 
-  指令重排也有限制不会出现：4321，语句 4 需要依赖于 y 以及 x 的申明，因为存在数据依赖，无法首先执行
+  **指令重排也有限制不会出现：4321，语句 4 需要依赖于 y 以及 x 的申明，因为存在数据依赖，无法首先执行**
 
 * example 2：
 
@@ -2592,7 +4510,7 @@ lock 前缀指令就相当于内存屏障，Memory Barrier（Memory Fence）
 
 保证**有序性**：
 
-* 写屏障会确保指令重排序时，不会将写屏障之前的代码排在写屏障之后
+* **写屏障会确保指令重排序时**，不会将写屏障之前的代码排在写屏障之后
 * 读屏障会确保指令重排序时，不会将读屏障之后的代码排在读屏障之前
 
 不能解决指令交错：
@@ -2639,7 +4557,7 @@ lock 前缀指令就相当于内存屏障，Memory Barrier（Memory Fence）
 
 
 
-#### 双端检锁
+#### 双端检锁Double-Checked Locking
 
 ##### 检锁机制
 
@@ -2699,7 +4617,7 @@ getInstance 方法对应的字节码为：
 14: ifnonnull 27
 17: new 			#3 		// class test/Singleton
 20: dup
-21: invokespecial 	#4 		// Method "<init>":()V
+21: invokespecial 	#4 		// Method "init":()V
 24: putstatic 		#2 		// Field INSTANCE:Ltest/Singleton;
 27: aload_0
 28: monitorexit
@@ -2747,7 +4665,7 @@ private static volatile SingletonDemo INSTANCE = null;
 
 
 
-### ha-be
+### happens-before 先行发生
 
 happens-before 先行发生
 
@@ -2891,7 +4809,7 @@ public class TestVolatile {
 
 
 
-## 无锁
+## 无锁并发
 
 ### CAS
 
@@ -2929,6 +4847,117 @@ CAS 缺点：
 
 
 
+
+
+#### Example: CAS lock-free withdraw
+
+```java
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
+public class TestAccount {
+    public static void main(String[] args) {
+        Account account2 = new AccountUnsafe(10000);
+        Account.demo(account2);
+
+        Account account = new AccountCas(10000);
+        Account.demo(account);
+        //先创建一个“线程不安全”的账户 AccountUnsafe
+//再创建一个“CAS 无锁”的账户 AccountCas
+    }
+}
+
+interface Account {
+    Integer getBalance();
+    void withdraw(Integer amount);
+
+    static void demo(Account account) {
+        List<Thread> ts = new ArrayList<>();
+        for (int i = 0; i < 1000; i++) {
+            ts.add(new Thread(() -> account.withdraw(10)));
+        }
+        long start = System.nanoTime();
+        ts.forEach(Thread::start);
+        ts.forEach(t -> {
+            try {
+                t.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        long end = System.nanoTime();
+        System.out.println("balance: " + account.getBalance());
+        System.out.println("cost: " + (end - start) / 1000_000 + " ms");
+    }
+}
+
+class AccountUnsafe implements Account {
+    private Integer balance;
+
+    public AccountUnsafe(int balance) {
+        this.balance = balance;
+    }
+
+    @Override
+    public Integer getBalance() {
+        return balance;
+    }
+
+    @Override
+    public void withdraw(Integer amount) {
+        balance -= amount;
+    }
+}
+/**
+问题点：
+
+这是一个典型的“读 → 改 → 写”操作：
+
+线程A读到 100
+线程B也读到 100
+A扣到 90 写回
+B也扣到 90 写回
+结果丢失一次扣款。
+所以最终余额经常不为 0，甚至可能 > 0。
+**/
+
+
+class AccountCas implements Account {
+    private AtomicInteger balance;
+
+    public AccountCas(int balance) {
+        this.balance = new AtomicInteger(balance);
+    }
+
+    @Override
+    public Integer getBalance() {
+        return balance.get();
+    }
+
+    @Override
+    public void withdraw(Integer amount) {
+        while (true) {
+            // read latest balance
+            int prev = balance.get();
+            // compute next balance
+            int next = prev - amount;
+            // attempt CAS
+            if (balance.compareAndSet(prev, next)) {
+                break;
+            }
+        }
+    }
+}
+/**
+compareAndSet(prev, next) 的意思是：
+
+如果当前值仍然等于 prev，就更新成 next；
+否则说明被别的线程改过了，CAS失败，需要重试。
+
+所以不会出现“读到旧值还写回去”的问题。
+**/
+```
 ***
 
 
@@ -2984,7 +5013,7 @@ CAS 算法：有 3 个操作数（内存值 V， 旧的预期值 A，要修改�
 * 当旧的预期值 A == 内存值 V   此时可以修改，将 V 改为 B
 * 当旧的预期值 A !=  内存值 V   此时不能修改，并重新获取现在的最新值，重新获取的动作就是自旋 
 
-分析 getAndSet 方法：
+分析 getAndSet 方法：**原子地把值更新成新值，并返回旧值**
 
 * AtomicInteger：
 
@@ -3070,7 +5099,6 @@ CAS 算法：有 3 个操作数（内存值 V， 旧的预期值 A，要修改�
 
 
 
-
 ***
 
 
@@ -3079,7 +5107,7 @@ CAS 算法：有 3 个操作数（内存值 V， 旧的预期值 A，要修改�
 
 原子引用：对 Object 进行原子操作，提供一种读和写都是原子性的对象引用变量
 
-原子引用类：AtomicReference、AtomicStampedReference、AtomicMarkableReference
+原子引用类：AtomicReference、AtomicStampedReference（给原子引用加上版本号，更新版本号）、AtomicMarkableReference
 
 AtomicReference 类：
 
@@ -3126,7 +5154,7 @@ class Student {
 
 #### 原子数组
 
-原子数组类：AtomicIntegerArray、AtomicLongArray、AtomicReferenceArray
+原子数组类：AtomicIntegerArray（整型）、AtomicLongArray、AtomicReferenceArray（保护引用类型的）
 
 AtomicIntegerArray 类方法：
 
@@ -3141,7 +5169,32 @@ public final boolean compareAndSet(int i, int expect, int update) {
 }
 ```
 
+原子数组常见方法（以 AtomicIntegerArray 为例）：
 
+- get(int i)：获取指定位置的值（具备可见性）
+- set(int i, int newValue)：直接设置值（可见）
+- lazySet(int i, int newValue)：延迟写（有序但可能稍后可见）
+- getAndSet(int i, int newValue)：原子替换并返回旧值
+- incrementAndGet(int i) / getAndIncrement(int i)：原子自增
+- decrementAndGet(int i) / getAndDecrement(int i)：原子自减
+- addAndGet(int i, int delta) / getAndAdd(int i, int delta)：原子加法
+- compareAndSet(int i, int expect, int update)：CAS，期望值匹配才更新
+
+AtomicLongArray / AtomicReferenceArray：
+
+- AtomicLongArray：与 IntegerArray 类似，操作 long
+- AtomicReferenceArray：原子更新引用类型（对象引用的原子性，不保证对象内部线程安全）
+
+
+
+1. **int[] + array[index]++ 是非原子操作**
+   - ++ 实际上是三步：读 → 加 1 → 写回
+   - 多线程同时读到相同旧值，会覆盖彼此结果 → **丢失更新**
+   - 所以最终统计会**小于理论值**，且每次运行不稳定。
+2. **AtomicIntegerArray.getAndIncrement(index) 是原子操作**
+   - 自增在 CPU 层面保证原子性
+   - 并发更新不会互相覆盖 → **计数更接近理论值**
+   - 结果稳定很多。
 
 ***
 
@@ -3174,6 +5227,55 @@ public class UpdateDemo {
 
 
 
+
+
+```java
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+
+@Slf4j(topic = "c.Test40")
+public class Test40 {
+    public static void main(String[] args) {
+        Student stu = new Student();
+
+        AtomicReferenceFieldUpdater<Student, String> updater =
+                AtomicReferenceFieldUpdater.newUpdater(Student.class, String.class, "name");
+
+        boolean ok = updater.compareAndSet(stu, null, "张三");
+        log.debug("cas result={}, stu={}", ok, stu);
+    }
+}
+
+class Student {
+    // 必须是 volatile，否则 newUpdater/compareAndSet 会抛异常
+    volatile String name;
+
+    @Override
+    public String toString() {
+        return "Student{name='" + name + "'}";
+    }
+}
+
+```
+
+#### 原子更新器（Field Updater）解读
+
+- **用途**：对“对象的某个字段”做原子更新，不需要把整个对象包进 AtomicReference。
+- **类型**：
+  - AtomicReferenceFieldUpdater：更新引用类型字段
+  - AtomicIntegerFieldUpdater：更新 int 字段
+  - AtomicLongFieldUpdater：更新 long 字段
+- **关键要求**：被更新字段必须 volatile，否则会抛
+  IllegalArgumentException: Must be volatile type。
+- **常用 API**：
+  - `newUpdater(Class<U> c, String fieldName)`：创建字段更新器
+  - compareAndSet(obj, expect, update)：**CAS**，只有当字段值等于 expect 才更新为 update
+- **对代码的理解**：
+  1. newUpdater(Student.class, String.class, "name") 指定要原子更新 Student 的 name 字段
+  2. compareAndSet(stu, null, "张三")：如果 name 当前为 null，才会更新为 "张三"
+  3. 这样实现“对单字段的原子赋值”，避免并发下的覆盖/脏写。
+
 ***
 
 
@@ -3196,7 +5298,6 @@ LongAdder 和 LongAccumulator 区别：
 
   * accumulatorFunction 是一个双目运算器接口，可以指定累加规则，比如累加或者相乘，其根据输入的两个参数返回一个计算值，LongAdder 内置累加规则
   * identity 则是 LongAccumulator 累加器的初始值，LongAccumulator 可以为累加器提供非0的初始值，而 LongAdder 只能提供默认的 0
-
 
 
 
@@ -4601,6 +6702,134 @@ java.util.concurrent.BlockingQueue 接口有以下阻塞队列的实现：**FIFO
 
 
 
+
+
+```java
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
+
+class BlockingQueue<T> {
+    // 1. 任务队列
+    private final Deque<T> queue = new ArrayDeque<>();
+
+    // 2. 锁
+    private final ReentrantLock lock = new ReentrantLock();
+
+    // 3. 生产者条件变量（队列满时等待）
+    private final Condition fullWaitSet = lock.newCondition();
+
+    // 4. 消费者条件变量（队列空时等待）
+    private final Condition emptyWaitSet = lock.newCondition();
+
+    // 5. 容量
+    private final int capacity;
+
+    public BlockingQueue(int capacity) {
+        this.capacity = capacity;
+    }
+
+    // 阻塞获取
+    public T take() {
+        lock.lock();
+        try {
+            while (queue.isEmpty()) {
+                try {
+                    emptyWaitSet.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            T t = queue.removeFirst();
+            // 唤醒可能在等待“队列不满”的生产者
+            fullWaitSet.signal();
+            return t;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    // 阻塞添加
+    public void put(T element) {
+        lock.lock();
+        try {
+            while (queue.size() == capacity) {
+                try {
+                    fullWaitSet.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            queue.addLast(element);
+            // 唤醒可能在等待“队列非空”的消费者
+            emptyWaitSet.signal();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    // 获取大小
+    public int size() {
+        lock.lock();
+        try {
+            return queue.size();
+        } finally {
+            lock.unlock();
+        }
+    }
+}
+
+// 带超时的获取：超时返回 null
+public T poll(long timeout, TimeUnit unit) {
+    lock.lock();
+    try {
+        long nanos = unit.toNanos(timeout);
+        while (queue.isEmpty()) {
+            if (nanos <= 0) {
+                return null;
+            }
+            try {
+                nanos = emptyWaitSet.awaitNanos(nanos);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        T t = queue.removeFirst();
+        fullWaitSet.signal();
+        return t;
+    } finally {
+        lock.unlock();
+    }
+}
+
+// 带超时的添加：超时返回 false
+public boolean offer(T element, long timeout, TimeUnit unit) {
+    lock.lock();
+    try {
+        long nanos = unit.toNanos(timeout);
+        while (queue.size() == capacity) {
+            if (nanos <= 0) {
+                return false;
+            }
+            try {
+                nanos = fullWaitSet.awaitNanos(nanos);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        queue.addLast(element);
+        emptyWaitSet.signal();
+        return true;
+    } finally {
+        lock.unlock();
+    }
+}
+
+```
+
+
+
 ***
 
 
@@ -4686,7 +6915,6 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
   * `first.item = null`：当前节点置为 Dummy 节点
 
   
-
 
 ***
 
@@ -5508,7 +7736,7 @@ public ThreadPoolExecutor(int corePoolSize,
 
 图片来源：https://space.bilibili.com/457326371/
 
-
+### 示例代码 线程池的实现，take死等，任务提交，拒绝策略
 
 ***
 
@@ -5527,7 +7755,7 @@ Executors 提供了四种线程池的创建：newCachedThreadPool、newFixedThre
   }
   ```
 
-  * 核心线程数 == 最大线程数（没有救急线程被创建），因此也无需超时时间
+  * 核心线程数 == 最大线程数（没有救急线程被创建），因此也无需超时时间。因为都是核心线程所以任务结束的时候线程也不会结束，所以后面需要线程结束
   * LinkedBlockingQueue 是一个单向链表实现的阻塞队列，默认大小为 `Integer.MAX_VALUE`，也就是无界队列，可以放任意数量的任务，在任务比较多的时候会导致 OOM（内存溢出）
   * 适用于任务量已知，相对耗时的长期任务
 
@@ -5628,16 +7856,83 @@ ExecutorService 类 API：
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | void execute(Runnable command)                               | 执行任务（Executor 类 API）                                  |
 | Future<?> submit(Runnable task)                              | 提交任务 task()                                              |
-| `Future submit(Callable<T> task)`                              | 提交任务 task，用返回值 Future 获得任务执行结果              |
+| `Future submit(Callable<T> task)`                            | 提交任务 task，用返回值 Future 获得任务执行结果              |
 | `List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks)` | 提交 tasks 中所有任务                                        |
 | `List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)` | 提交 tasks 中所有任务，超时时间针对所有task，超时会取消没有执行完的任务，并抛出超时异常 |
-| `T invokeAny(Collection<? extends Callable<T>> tasks)`         | 提交 tasks 中所有任务，哪个任务先成功执行完毕，返回此任务执行结果，其它任务取消 |
+| `T invokeAny(Collection<? extends Callable<T>> tasks)`       | 提交 tasks 中所有任务，哪个任务先成功执行完毕，返回此任务执行结果，其它任务取消 |
 
 execute 和 submit 都属于线程池的方法，对比：
 
 * execute 只能执行 Runnable 类型的任务，没有返回值； submit 既能提交 Runnable 类型任务也能提交 Callable 类型任务，底层是**封装成 FutureTask，然后调用 execute 执行**
 
 * execute 会直接抛出任务执行时的异常，submit 会吞掉异常，可通过 Future 的 get 方法将任务执行时的异常重新抛出
+
+
+
+
+
+```java
+import java.util.*;
+import java.util.concurrent.*;
+
+public class ExecutorExamples {
+    public static void main(String[] args) throws Exception {
+        ExecutorService pool = Executors.newFixedThreadPool(3);
+
+        // 1) execute(Runnable)
+        pool.execute(() -> System.out.println("execute: " + Thread.currentThread().getName()));
+
+        // 2) submit(Runnable) -> Future<?> (get 返回 null)
+        Future<?> f1 = pool.submit(() -> System.out.println("submit Runnable"));
+        System.out.println("submit Runnable get: " + f1.get()); // null
+
+        // 3) submit(Callable<T>) -> Future<T>
+        Future<Integer> f2 = pool.submit(() -> {
+            Thread.sleep(200);
+            return 42;
+        });
+        System.out.println("submit Callable get: " + f2.get());
+
+        // 4) invokeAll(tasks) -> List<Future<T>>
+        List<Callable<String>> tasks1 = Arrays.asList(
+                () -> "A",
+                () -> "B",
+                () -> "C"
+        );
+        List<Future<String>> results1 = pool.invokeAll(tasks1);
+        for (Future<String> f : results1) {
+            System.out.println("invokeAll result: " + f.get());
+        }
+
+        // 5) invokeAll(tasks, timeout, unit)
+        List<Callable<String>> tasks2 = Arrays.asList(
+                () -> { Thread.sleep(100); return "fast"; },
+                () -> { Thread.sleep(1000); return "slow"; }
+        );
+        List<Future<String>> results2 = pool.invokeAll(tasks2, 200, TimeUnit.MILLISECONDS);
+        for (Future<String> f : results2) {
+            if (f.isCancelled()) {
+                System.out.println("invokeAll timeout -> cancelled");
+            } else {
+                System.out.println("invokeAll timeout -> " + f.get());
+            }
+        }
+        // 注意：invokeAll(timeout) 本身不会抛 TimeoutException，
+        // 超时未完成的任务会被取消。
+
+        // 6) invokeAny(tasks) -> 先成功完成的结果
+        List<Callable<String>> tasks3 = Arrays.asList(
+                () -> { Thread.sleep(300); return "slowest"; },
+                () -> { Thread.sleep(100); return "fastest"; }
+        );
+        String winner = pool.invokeAny(tasks3);
+        System.out.println("invokeAny result: " + winner);
+
+        pool.shutdown();
+    }
+}
+
+```
 
 
 
@@ -7829,7 +10124,12 @@ class MockConnection implements Connection {
 }
 ```
 
+这段代码体现的是“**对象复用**”的思想，属于**享元模式的典型应用形态（连接池/对象池）**。具体体现在：
 
+- **共享对象、减少创建**：Pool 预先创建 poolSize 个 MockConnection，线程不是 new 连接，而是**借用已有连接**。
+- **对象可复用**：borrow() 返回池中的同一个 Connection 实例；free() 归还后，下一个线程还能再次使用同一实例。
+- **共享 + 状态外置**：连接是否可用的“状态”没有放在连接对象里，而是用 states 数组维护（0/1），这相当于**把可变状态外置**，与享元“外部状态”的思想一致。
+- **有限实例池**：实例数量被严格限制（poolSize），多个线程竞争少量对象，这是享元“共享少量对象给大量使用者”的核心。
 
 
 
@@ -8082,7 +10382,7 @@ class MyLock implements Lock {
 
 
 
-### Re-Lock
+### Re-Lock    ReentrantLock
 
 #### 锁对比
 
@@ -8548,7 +10848,7 @@ public final boolean hasQueuedPredecessors() {
 
 
 
-#### 可重入
+#### 可重入ReentrantLock
 
 可重入是指同一个线程如果首次获得了这把锁，那么它是这把锁的拥有者，因此有权利再次获取这把锁，如果不可重入锁，那么第二次获得锁时，自己也会被锁挡住，直接造成死锁
 
@@ -8787,7 +11087,7 @@ public static void main(String[] args) throws InterruptedException {
 
 
 
-#### 锁超时
+#### 锁超时tryLock()
 
 ##### 基本使用
 
@@ -9337,7 +11637,7 @@ ReentrantReadWriteLock 其**读锁是共享锁，写锁是独占锁**
   }
   ```
 
-* 读-读能共存、读-写不能共存、写-写不能共存
+* **读-读能共存、读-写不能共存、写-写不能共存**
 
 * 读锁不支持条件变量
 
@@ -10471,6 +12771,12 @@ public static void main(String[] args) {
 synchronized 可以起到锁的作用，但某个时间段内，只能有一个线程允许执行
 
 Semaphore（信号量）用来限制能同时访问共享资源的线程上限，非重入锁
+
+不适合分布式的情况。
+
+使用Seinapbhore限流，在访问高峰期时，让请求线程阻塞，高峰期过去再释放许可，当然它只适合限制单机线程数量，并且仅是限制线程数，而不是限制资源数(例如连接数，请对比Tomcat LimitLatch的实现
+
+用Semaphore实现简单连接池，对比『享元模式』下的实现(用wait notify)，性能和可读性显然更好，注意下面的实现中线程数和数据库连接数是相等的
 
 构造方法：
 
@@ -12671,7 +14977,6 @@ BaseHeader 存储数据，headIndex 存储索引，纵向上**所有索引都指
           return n;
   }
   ```
-
 
 
 
@@ -15465,4 +17770,3 @@ AsynchronousSocketChannel、AsynchronousServerSocketChannel、AsynchronousFileCh
 
 
 ****
-
