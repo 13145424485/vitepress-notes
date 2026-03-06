@@ -112,29 +112,37 @@ Mybatis 动态 sql 可以让我们在 Xml 映射文件内，以标签的形式�
 MyBatis if 类似于 Java 中的 if 语句，是 MyBatis 中最常用的判断语句。使用 if 标签可以节省许多拼接 SQL 的工作，把精力集中在 XML 的维护上。
 
 （1）不使用动态sql
+
+```xml
 <select id="selectUserByUsernameAndSex"
         resultType="user" parameterType="com.ys.po.User">
     <!-- 这里和普通的sql 查询语句差不多，对于只有一个参数，后面的 #{id}表示占位符，里面          不一定要写id,
          写啥都可以，但是不要空着，如果有多个参数则必须写pojo类里面的属性 -->
     select * from user where username=#{username} and sex=#{sex}
 </select>
+```
 
 if 语句使用方法简单，常常与 test 属性联合使用。语法如下。
 
-<if test="判断条件">    SQL语句</if>
+```xml
+<if test="判断条件">SQL语句</if>
+```
 
 （2）使用动态sql
 上面的查询语句，我们可以发现，如果 #{username} 为空，那么查询结果也是空，如何解决这个问题呢？使用 if 来判断，可多个 if 语句同时使用。以下语句表示为可以按照网站名称（name）或者网址（url）进行模糊查询。如果您不输入名称或网址，则返回所有的网站记录。但是，如果你传递了任意一个参数，它就会返回与给定参数相匹配的记录。
 
-<select id="selectAllWebsite" resultMap="myResult">  
-    select id,name,url from website 
-    where 1=1    
-   <if test="name != null">        
-       AND name like #{name}   
-   </if>    
-   <if test="url!= null">        
-       AND url like #{url}    
-   </if></select>
+```xml
+<select id="selectAllWebsite" resultMap="myResult">
+    select id,name,url from website
+    where 1=1
+   <if test="name != null">
+       AND name like #{name}
+   </if>
+   <if test="url!= null">
+       AND url like #{url}
+   </if>
+</select>
+```
 ##### 2.where+if标签
 
 where、if同时使用可以进行查询、模糊查询
@@ -143,23 +151,25 @@ where、if同时使用可以进行查询、模糊查询
 
  **根据传入的条件动态拼接 WHERE 子句，实现多条件组合查询（模糊查询 + 精确查询）**
 
+```xml
 <select id="findQuery" resultType="Student">
-            <include refid="selectvp"/>
-            <where>
-                <if test="sacc != null">
-                    sacc like concat('%' #{sacc} '%')
-                </if>
-                <if test="sname != null">
-                    AND sname like concat('%' #{sname} '%')
-                </if>
-                <if test="sex != null">
-                    AND sex=#{sex}
-                </if>
-                <if test="phone != null">
-                    AND phone=#{phone}
-                </if>
-            </where>
-        </select>
+    <include refid="selectvp"/>
+    <where>
+        <if test="sacc != null">
+            sacc like concat('%' #{sacc} '%')
+        </if>
+        <if test="sname != null">
+            AND sname like concat('%' #{sname} '%')
+        </if>
+        <if test="sex != null">
+            AND sex=#{sex}
+        </if>
+        <if test="phone != null">
+            AND phone=#{phone}
+        </if>
+    </where>
+</select>
+```
 
 
 这个“where”标签会知道如果它包含的标签中有返回值的话，它就插入一个‘where’。此外，如果标签返回的内容是以AND 或OR 开头的，则它会剔除掉。
@@ -214,22 +224,24 @@ set可以用来修改
 
  
 
+```xml
 <select id="selectUserByChoose" resultType="com.ys.po.User" parameterType="com.ys.po.User">
-      select * from user
-      <where>
-          <choose>
-              <when test="id !='' and id != null">
-                  id=#{id}
-              </when>
-              <when test="username !='' and username != null">
-                  and username=#{username}
-              </when>
-              <otherwise>
-                  and sex=#{sex}
-              </otherwise>
-          </choose>
-      </where>
-  </select>
+    select * from user
+    <where>
+        <choose>
+            <when test="id !='' and id != null">
+                id=#{id}
+            </when>
+            <when test="username !='' and username != null">
+                and username=#{username}
+            </when>
+            <otherwise>
+                and sex=#{sex}
+            </otherwise>
+        </choose>
+    </where>
+</select>
+```
 　也就是说，这里我们有三个条件，id,username,sex，只能选择一个作为查询条件
 
 　　　　如果 id 不为空，那么查询语句为：select * from user where  id=?
@@ -245,12 +257,15 @@ foreach 元素的功能非常强大，它允许你指定一个集合，声明可
 你可以将任何可迭代对象（如 List、Set 等）、Map 对象或者数组对象作为集合参数传递给 foreach。当使用可迭代对象或者数组时，index 是当前迭代的序号，item 的值是本次迭代获取到的元素。当使用 Map 对象（或者 Map.Entry 对象的集合）时，index 是键，item 是值。
 
 //批量查询
+
+```xml
 <select id="findAll" resultType="Student" parameterType="Integer">
     <include refid="selectvp"/> WHERE sid in
     <foreach item="ids" collection="array"  open="(" separator="," close=")">
         #{ids}
     </foreach>
 </select>
+```
 | 属性                 | 作用             | 示例值                        |
 | -------------------- | ---------------- | ----------------------------- |
 | `collection="array"` | 遍历对象类型     | `array` = 数组，`list` = List |
@@ -261,7 +276,7 @@ foreach 元素的功能非常强大，它允许你指定一个集合，声明可
 
 //批量删除
 
-```
+```xml
 <delete id="del"  parameterType="Integer">
     delete  from  student  where  sid in
     <foreach item="ids" collection="array"  open="(" separator="," close=")">
@@ -274,9 +289,9 @@ foreach 元素的功能非常强大，它允许你指定一个集合，声明可
 
 #### 7.sql
 
-在实际开发中会遇到许多相同的SQL，比如根据某个条件筛选，这个筛选很多地方都能用到，我们可以将其抽取出来成为一个公用的部分，这样修改也方便，一旦出现了错误，只需要改这一处便能处处生效了，此时就用到了<sql>这个标签了。
+在实际开发中会遇到许多相同的SQL，比如根据某个条件筛选，这个筛选很多地方都能用到，我们可以将其抽取出来成为一个公用的部分，这样修改也方便，一旦出现了错误，只需要改这一处便能处处生效了，此时就用到了`<sql>`这个标签了。
 
-当多种类型的查询语句的查询字段或者查询条件相同时，可以将其定义为常量，方便调用。为求 <select> 结构清晰也可将 sql 语句分解。
+当多种类型的查询语句的查询字段或者查询条件相同时，可以将其定义为常量，方便调用。为求 `<select>` 结构清晰也可将 sql 语句分解。
 
 ```xml
 <sql id="selectvp">
@@ -340,10 +355,11 @@ foreach 元素的功能非常强大，它允许你指定一个集合，声明可
 
 #### 8.include
 
-这个标签和<sql>是天仙配，是共生的，include用于引用sql标签定义的常量。比如引用上面sql标签定义的常量
+这个标签和`<sql>`是天仙配，是共生的，include用于引用sql标签定义的常量。比如引用上面 sql 标签定义的常量
 
-refid这个属性就是指定<sql>标签中的id值（唯一标识）
+refid这个属性就是指定`<sql>`标签中的id值（唯一标识）
 
+```xml
 <select id="findbyid"  resultType="student">
     <include refid="selectvp"/>
     WHERE 1=1
@@ -351,3 +367,4 @@ refid这个属性就是指定<sql>标签中的id值（唯一标识）
         AND sid like #{sid}
     </if>
 </select>
+```

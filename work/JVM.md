@@ -50,7 +50,7 @@
 
 
 
-![](C:\Users\22373\Desktop\vitepress\image、\work\p9SXRRP.png)
+![](../image、/work/p9SXRRP.png)
 
 
 
