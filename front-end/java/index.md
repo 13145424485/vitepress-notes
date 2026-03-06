@@ -55,9 +55,9 @@ import { withBase } from 'vitepress'
     <p class="desc">集合、工具类、并发常用写法。</p>
     <span class="cta">进入 &rarr;</span>
   </a>
-  <a class="guide-card" :href="withBase('/front-end/java/编写好习惯')">
+  <a class="guide-card" :href="withBase('/front-end/java/编写好习惯及java新特性')">
     <p class="label">代码规范</p>
-    <p class="title">编写好习惯</p>
+    <p class="title">编写习惯及 Java 新特性</p>
     <p class="desc">Optional、Java 8 新特性与空指针规避等日常编码习惯整理。</p>
     <span class="cta">查看 &rarr;</span>
   </a>
