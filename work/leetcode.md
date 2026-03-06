@@ -786,3 +786,38 @@ class Solution {
 }
 ```
 
+## 滑动窗口最大值
+
+### 双端队列
+
+- 我们可以使用双端队列（Deque）来解决这个问题。
+  1. 维护双端队列：
+     - 用Deque存放元素的索引。在任何时刻，Deque的头部总是滑动窗口中的最大值的索引。那么当窗口滑动时，我们只取Deque的头部即可获取最大值。
+  2. 滑动窗口滑动：
+     - `移除窗口最左侧的元素：`如果Deque头部元素的索引已经超出当前窗口的范围（即j - k + 1之前的元素），那么从头部移除该元素。
+     - `维护单调递减性：`将当前元素和Deque尾部元素比较，如果当前元素比尾部元素大，那么尾部元素不可能是当前滑动窗口的最大值，那我们移除尾部元素。重复此操作，直至Deque中的所有元素都大于当前元素，即可保持单调递减。
+     - `添加当前元素：`将当前元素的索引加入Deque。
+
+```java
+class Solution {
+    public int[] maxSlidingWindow(int[] nums, int k) {
+        if(nums.length == 0 || k == 0) return new int[0];
+        Deque<Integer> deque = new LinkedList<>();
+        int[] res = new int[nums.length - k + 1];
+        for(int j = 0, i = 1 - k; j < nums.length; i++, j++) {
+            // 删除 deque 中对应的 nums[i-1]
+            if(i > 0 && deque.peekFirst() == nums[i - 1])
+                deque.removeFirst();
+            // 保持 deque 递减
+            while(!deque.isEmpty() && deque.peekLast() < nums[j])
+                deque.removeLast();
+            deque.addLast(nums[j]);
+            // 记录窗口最大值
+            if(i >= 0)
+                res[i] = deque.peekFirst();
+        }
+        return res;
+    }
+}
+```
+

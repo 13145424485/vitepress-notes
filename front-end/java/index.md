@@ -31,6 +31,12 @@ import { withBase } from 'vitepress'
     <p class="desc">以https://github.com/13145424485/management为例，学习springboot等技术</p>
     <span class="cta">阅读 &rarr;</span>
   </a>
+  <a class="guide-card" :href="withBase('/front-end/java/springboot')">
+    <p class="label">框架基础</p>
+    <p class="title">Spring Boot</p>
+    <p class="desc">常用 Web 注解、参数绑定与接口开发基础，适合作为后端开发起步速查。</p>
+    <span class="cta">开始 &rarr;</span>
+  </a>
   <a class="guide-card" :href="withBase('/front-end/java/spring%20cloud')">
     <p class="label">微服务</p>
     <p class="title">Spring Cloud</p>
@@ -49,6 +55,12 @@ import { withBase } from 'vitepress'
     <p class="desc">集合、工具类、并发常用写法。</p>
     <span class="cta">进入 &rarr;</span>
   </a>
+  <a class="guide-card" :href="withBase('/front-end/java/编写好习惯')">
+    <p class="label">代码规范</p>
+    <p class="title">编写好习惯</p>
+    <p class="desc">Optional、Java 8 新特性与空指针规避等日常编码习惯整理。</p>
+    <span class="cta">查看 &rarr;</span>
+  </a>
   <a class="guide-card" :href="withBase('/front-end/java/JVM')">
     <p class="label">原理</p>
     <p class="title">JVM</p>
@@ -66,6 +78,12 @@ import { withBase } from 'vitepress'
     <p class="title">MyBatis</p>
     <p class="desc">SQL 映射、分页、多数据源、缓存配置与常见踩坑记录。</p>
     <span class="cta">查看 &rarr;</span>
+  </a>
+  <a class="guide-card" :href="withBase('/front-end/java/OSS')">
+    <p class="label">文件存储</p>
+    <p class="title">OSS 对象存储</p>
+    <p class="desc">阿里云 OSS SDK、上传下载、签名直传与项目配置示例。</p>
+    <span class="cta">进入 &rarr;</span>
   </a>
   <a class="guide-card accent" :href="withBase('/front-end/java/redis')">
     <p class="label">专题</p>
