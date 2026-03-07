@@ -821,3 +821,32 @@ class Solution {
 }
 ```
 
+# 普通数组
+
+## 最大子数组和
+
+[最大子数组和](https://leetcode.cn/problems/maximum-subarray/)
+
+### 动态规划
+
+- 经典的动态规划问题，状态转移方程：`dp[i] = Math.max(dp[i - 1] + nums[i], nums[i])`
+
+```java
+class Solution {
+	public int maxSubArray(int[] nums) {
+		int[] dp = new int[nums.length];
+		dp[0] = nums[0];
+		for (int i = 1; i < nums.length; i++) {
+			dp[i] = Math.max(dp[i - 1] + nums[i], nums[i]);
+		}
+        // dp[i]表示以i结尾的最大子数组和，排序后取第一个，即为结果
+        int res = dp[0];
+        for (int i = 1; i < nums.length; i++) {
+            res = Math.max(res, dp[i]);
+        }
+        return res;
+
+	}
+}
+```
+
