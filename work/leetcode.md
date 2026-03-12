@@ -850,3 +850,39 @@ class Solution {
 }
 ```
 
+
+
+## 合并区间
+
+[56. 合并区间](https://leetcode.cn/problems/merge-intervals/)
+
+### 排序+遍历合并
+
+1. 排序：首先将区间按照起始位置`start`升序排序。这样可以保证当遍历到某个区间时，之前区间的起始位置都小于等于当前区间的起始位置。
+2. 遍历合并：
+   - 用一个`merged`列表来保存合并后的区间。
+   - 对于当前区间`intervals[i]`
+     - 如果`merged`为空，或者当前区间起始位置大于`megerd`中的最后一个区间的结束位置，说明它们之间没有重叠，可以直接将当前区间添加到`merged`中。
+     - 否则，他们重叠，我们将`merged`中的最后一个区间的结束为止更新为当前区间的结束位置。
+3. 返回结果：merged列表中即为合并后的区间。
+
+```java
+class Solution {
+    public int[][] merge(int[][] intervals) {
+
+        Arrays.sort(intervals, (a, b) -> a[0] - b[0]);
+
+        LinkedList<int []> merged = new LinkedList<>();
+
+        for(int[] interval : intervals){
+            if(merged.isEmpty() || merged.getLast()[1] < interval[0]){
+                merged.add(interval);
+            }else{
+                merged.getLast()[1] = Math.max(merged.getLast()[1],interval[1]);
+            }
+        }
+        return merged.toArray(new int[merged.size()][]);
+    }
+}
+```
+
