@@ -17,7 +17,12 @@ export default defineConfig({
         ],
        },
       {text:'笔记',link:'/front-end/java/'},
-      {text:'面试',link:'/work'},
+      { text: '面试',
+        items: [
+          { text: '面试', link: '/work/' },
+          { text: '项目面经', link: '/work/项目面经' }
+        ],
+       },
       { text: '通信', 
         items: [
           { text: '通信', link: '/' },

@@ -26,7 +26,7 @@ public boolean containsValue(Object value)：判断是否包含某个值，包�
 | **用途**     | 去重、快速判断"是否存在"          | 存储映射关系、快速查找对应值      |
 | **方法**     | `add()`, `contains()`, `remove()` | `put()`, `get()`, `containsKey()` |
 
-## 两数之和
+## 1.两数之和
 
 
 
@@ -89,7 +89,7 @@ https://leetcode.cn/problems/two-sum/submissions/697954496/
   }
   ```
 
-## 字母异位词分组
+## 2.字母异位词分组
 
 https://leetcode.cn/problems/group-anagrams/description/
 
@@ -232,7 +232,7 @@ String key = new String(charArray);      // ['a','e','t'] → "aet"
     map 现状: {"aet": ["eat", "tea"], "ant": ["tan"]}
 ```
 
-## 最长连续序列
+## 3.最长连续序列
 
 - 我寻思这题双指针做，不是超级简单吗？为什么会出现在哈希里呢？只可惜排序是时间复杂度O(nlogn)的。
 
@@ -297,7 +297,7 @@ class Solution {
 
 # 双指针
 
-## 移动零
+## 4.移动零
 
 https://leetcode.cn/problems/move-zeroes/description/
 
@@ -382,7 +382,7 @@ https://leetcode.cn/problems/move-zeroes/description/
 
 
 
-## 盛最多水的容器
+## 5.盛最多水的容器
 
 [盛最多水的容器](https://leetcode.cn/problems/container-with-most-water/)
 
@@ -415,7 +415,7 @@ class Solution {
 
 
 
-## 三数之和
+## 6.三数之和
 
 [15. 三数之和](https://leetcode.cn/problems/3sum/)
 
@@ -457,7 +457,7 @@ class Solution {
 
 
 
-## 接雨水
+## 7.接雨水
 
 [ 接雨水](https://leetcode.cn/problems/trapping-rain-water/)
 
@@ -598,7 +598,7 @@ public int trap(int[] height) {
 
 # 滑动窗口
 
-## 无重复字符的最长子串
+## 8.无重复字符的最长子串
 
 [无重复字符的最长子串](https://leetcode.cn/problems/longest-substring-without-repeating-characters/)
 
@@ -750,7 +750,7 @@ class Solution {
 
 # 子串
 
-## 和为 K 的子数组
+## 9.和为 K 的子数组
 
 [和为 K 的子数组](https://leetcode.cn/problems/subarray-sum-equals-k/)
 
@@ -786,7 +786,7 @@ class Solution {
 }
 ```
 
-## 滑动窗口最大值
+## 10.滑动窗口最大值
 
 ### 双端队列
 
@@ -823,7 +823,7 @@ class Solution {
 
 # 普通数组
 
-## 最大子数组和
+## 11.最大子数组和
 
 [最大子数组和](https://leetcode.cn/problems/maximum-subarray/)
 
@@ -852,7 +852,7 @@ class Solution {
 
 
 
-## 合并区间
+## 12.合并区间
 
 [56. 合并区间](https://leetcode.cn/problems/merge-intervals/)
 
@@ -886,3 +886,91 @@ class Solution {
 }
 ```
 
+## 13.合并区间
+
+[56. 合并区间](https://leetcode.cn/problems/merge-intervals/)
+
+### 轮转数组
+
+让我们把眼光从单个的数字（索引）上移开，把数组看成由**两块大的积木**组成的。
+
+1. 建立模型：两块积木
+
+假设数组是 `[1, 2, 3, 4, 5, 6, 7]`，`k = 3`。
+我们要把后面 3 个数移到前面去。
+
+我们可以把数组切分成两部分（两块积木）：
+
+- **积木 A**（前面不动的）：`[1, 2, 3, 4]`
+- **积木 B**（后面要移走的）：`[5, 6, 7]`
+
+**现在的状态**： `A` + `B`
+**我们的目标**： `B` + `A` （即 `[5, 6, 7, 1, 2, 3, 4]`）
+
+------
+
+2. 核心矛盾
+
+我们想把 `A` 和 `B` 的位置互换。
+如果我们有无限的空间，我们直接把 B 拿出来放前面就行了。
+但在 *O*(1) 空间限制下，我们只能在原地折腾。
+
+3. 魔法的解密：负负得正
+
+让我们看看**“全部翻转”**到底做了什么物理操作。
+
+**操作一：翻转整体 (Reverse Whole)**
+原始：`[ 1, 2, 3, 4 | 5, 6, 7 ]` (也就是 `A` | `B`)
+翻转后：`[ 7, 6, 5 | 4, 3, 2, 1 ]`
+
+请注意观察！虽然里面的数字顺序乱了，但是**积木的位置**发生了什么变化？
+
+- 原本在右边的 `5, 6, 7`（积木 B），现在跑到了**左边**。
+- 原本在左边的 `1, 2, 3, 4`（积木 A），现在跑到了**右边**。
+
+这时候的状态其实是：**`B逆` + `A逆`**
+（`B逆` 代表倒序的 B，`A逆` 代表倒序的 A）。
+
+**关键点来了：**
+这时候，**大块积木的位置已经对了！**（B 在前，A 在后）。
+唯一的缺点是：每块积木内部是反的。
+
+**操作二 & 三：局部修复 (Reverse Parts)**
+既然位置对了，只剩下内部顺序是反的，那我们怎么做？
+很简单，**负负得正**。
+
+- 把左边这块（`B逆`）再翻转一次 → 变回 `B`。
+- 把右边这块（`A逆`）再翻转一次 → 变回 `A`。
+
+------
+
+总结图解
+
+1. **初始**： `A` `B`
+2. **全翻**： `B'` `A'` (位置换了，内容反了)
+3. **翻左**： `B` `A'` (B 好了)
+4. **翻右**： `B` `A` (A 也好了，大功告成！)
+
+```java
+class Solution {
+    public void rotate(int[] nums, int k) {
+        int len = nums.length;
+        k %= len;
+        reverse(nums,0,len-1);
+        reverse(nums,0,k-1);
+        reverse(nums,k,len-1);
+    }
+
+    public void reverse(int[] nums,int i ,int j){
+        while(i < j){
+            int temp = nums[i];
+            nums[i++] = nums[j];
+            nums[j--] =  temp;
+        }
+    }
+}
+```
+
+## 14.缺失的第一个正数
+
+[41. 缺失的第一个正数](https://leetcode.cn/problems/first-missing-positive/)
