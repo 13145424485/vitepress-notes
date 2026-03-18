@@ -4,7 +4,7 @@ layout: home
 hero:
   name: "面试与项目"
   text: "八股整理、项目复盘与刷题记录"
-  tagline: "JVM、MySQL、并发、消息队列、Spring、LeetCode、项目面经"
+  tagline: "JVM、MySQL、Redis、并发、消息队列、Spring Cloud、操作系统、计算机网络、LeetCode、项目面经"
   actions:
     - theme: brand
       text: 八股总览
@@ -33,13 +33,29 @@ features:
     details: 慢查询定位与优化、索引失效场景等数据库面试题。
     link: /work/Mysql
     linkText: 进入
+  - title: Redis
+    details: Redis 相关面试笔记，当前内容仍在补充中。
+    link: /work/Redis
+    linkText: 进入
   - title: 消息队列
     details: Kafka 生产者如何保证消息不丢失，以及可靠性设计思路。
     link: /work/消息队列
     linkText: 进入
+  - title: Spring Cloud
+    details: Spring Cloud 相关笔记与面试整理，当前内容持续补充中。
+    link: /work/Springcloud
+    linkText: 进入
   - title: JVM
     details: JVM、操作系统、IO 相关笔记与面试问答。
     link: /work/JVM
+    linkText: 进入
+  - title: 操作系统
+    details: kill -9、进程退出、Linux 常用指令等操作系统基础题整理。
+    link: /work/操作系统
+    linkText: 进入
+  - title: 计算机网络
+    details: HTTP/HTTPS、状态码与网络基础高频问题整理。
+    link: /work/计算机网络
     linkText: 进入
   - title: LeetCode
     details: 常见题型、Java 解法与刷题过程中的方法总结。
