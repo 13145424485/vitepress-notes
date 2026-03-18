@@ -974,3 +974,76 @@ class Solution {
 ## 14.缺失的第一个正数
 
 [41. 缺失的第一个正数](https://leetcode.cn/problems/first-missing-positive/)
+
+# 二叉树
+
+## 二叉树的中序遍历
+
+[94. 二叉树的中序遍历](https://leetcode.cn/problems/binary-tree-inorder-traversal/)
+
+- 前序遍历：打印 - 左 - 右
+- 中序遍历：左 - 打印 - 右
+- 后序遍历：左 - 右 - 打
+
+
+
+### 递归
+
+```java
+class Solution {
+	public List<Integer> inorderTraversal(TreeNode root) {
+		List<Integer> res = new ArrayList<Integer>();
+		dfs(res,root);
+		return res;
+	}
+	
+	void dfs(List<Integer> res, TreeNode root) {
+		if(root==null) {
+			return;
+		}
+		//按照 左-打印-右的方式遍历
+		dfs(res,root.left);
+		res.add(root.val);
+		dfs(res,root.right);
+	}
+}
+
+```
+
+### 迭代
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    public List<Integer> inorderTraversal(TreeNode root) {
+        List<Integer> res = new ArrayList<Integer>();
+        Stack<TreeNode> stack = new Stack<TreeNode>();
+        while(stack.size() > 0 || root != null){
+            if(root!=null){
+                stack.add(root);
+                root = root.left;
+            }else{
+                TreeNode temp = stack.pop();
+                res.add(temp.val);
+                root = temp.right;
+            }
+        }
+        return res;
+    }
+}
+```
+
