@@ -1047,3 +1047,62 @@ class Solution {
 }
 ```
 
+## 二叉树的最大深度
+
+[104. 二叉树的最大深度](https://leetcode.cn/problems/maximum-depth-of-binary-tree/)
+
+### 自底向上
+
+```java
+class Solution {
+    public int maxDepth(TreeNode root) {
+        if(root == null){
+            return 0;
+        }
+        else{
+            int left = maxDepth(root.left);
+            int right = maxDepth(root.right);
+            return Math.max(left,right)+1;
+        }
+    }
+}
+```
+
+### 自顶向下
+
+
+
+
+
+
+
+```java
+class Solution {
+    private int ans;
+
+    public int maxDepth(TreeNode root) {
+        dfs(root, 0);
+        return ans;
+    }
+
+    private void dfs(TreeNode node, int depth) {
+        if (node == null) {
+            return;
+        }
+        depth++;
+        ans = Math.max(ans, depth);
+        dfs(node.left, depth);
+        dfs(node.right, depth);
+    }
+}
+
+```
+
+
+
+| 特性     | 原写法（返回值递归） | 本次写法（DFS + 全局变量） |
+| -------- | -------------------- | -------------------------- |
+| 核心思路 | 后序遍历，自底向上   | 前序遍历，自顶向下         |
+| 存储方式 | 栈帧存储局部变量     | 类成员变量存储最大值       |
+| 终止逻辑 | 空节点返回 0         | 空节点直接返回             |
+| 深度计算 | 子树深度 + 1         | 遍历路径时逐层 + 1         |
