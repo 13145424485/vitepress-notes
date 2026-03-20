@@ -1106,3 +1106,56 @@ class Solution {
 | 存储方式 | 栈帧存储局部变量     | 类成员变量存储最大值       |
 | 终止逻辑 | 空节点返回 0         | 空节点直接返回             |
 | 深度计算 | 子树深度 + 1         | 遍历路径时逐层 + 1         |
+
+
+
+
+
+
+
+## 翻转二叉树
+
+[LCR 144. 翻转二叉树](https://leetcode.cn/problems/er-cha-shu-de-jing-xiang-lcof/)
+
+### 递归
+
+```java
+class Solution {
+    public TreeNode flipTree(TreeNode root) {
+        if(root == null){return null;}
+        TreeNode tmp = root.left;
+        root.left = flipTree(root.right);
+        root.right = flipTree(tmp);
+        return root;
+    }
+}
+```
+
+## 对称二叉树
+
+### 递归
+
+```java
+class Solution {
+
+  public boolean isSymmetric(TreeNode root) {
+
+​    return isSameTree(root.left,root.right);
+
+  }
+
+  private boolean isSameTree(TreeNode p,TreeNode q){
+
+​    if(p ==null || q == null){
+
+​      return p == q;
+
+​    }
+
+​    return p.val == q.val && isSameTree(p.left,q.right) && isSameTree(p.right,q.left);
+
+  }
+
+}
+```
+
