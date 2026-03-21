@@ -4,7 +4,7 @@ layout: home
 hero:
   name: "面试与项目"
   text: "八股整理、项目复盘与刷题记录"
-  tagline: "JVM、MySQL、Redis、并发、消息队列、Spring Cloud、操作系统、计算机网络、LeetCode、项目面经"
+  tagline: "JVM、MySQL、Redis、并发、消息队列、Spring Cloud、操作系统、计算机网络、设计模式、AI、LeetCode、项目面经"
   actions:
     - theme: brand
       text: 八股总览
@@ -56,6 +56,14 @@ features:
   - title: 计算机网络
     details: HTTP/HTTPS、状态码与网络基础高频问题整理。
     link: /work/计算机网络
+    linkText: 进入
+  - title: 设计模式
+    details: 策略模式、工厂模式等常见设计模式笔记，当前内容持续补充中。
+    link: /work/设计模式
+    linkText: 进入
+  - title: AI
+    details: RAG 基础流程、知识库检索与生成式问答的入门整理。
+    link: /work/AI
     linkText: 进入
   - title: LeetCode
     details: 常见题型、Java 解法与刷题过程中的方法总结。
