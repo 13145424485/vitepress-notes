@@ -3,12 +3,12 @@ layout: home
 
 hero:
   name: "面试与项目"
-  text: "八股整理、项目复盘与刷题记录"
-  tagline: "JVM、MySQL、Redis、并发、消息队列、Spring Cloud、操作系统、计算机网络、设计模式、AI、LeetCode、项目面经"
+  text: "Java 八股、项目复盘与刷题记录"
+  tagline: "Java、JUC、JVM、MySQL、Redis、消息队列、Spring、微服务、操作系统、计算机网络、设计模式、AI、LeetCode、项目面经"
   actions:
     - theme: brand
-      text: 八股总览
-      link: /work/八股
+      text: Java 基础
+      link: /work/Java
     - theme: alt
       text: 项目面经
       link: /work/项目面经
@@ -17,52 +17,52 @@ hero:
       link: /work/leetcode
 
 features:
-  - title: 八股总览
-    details: JIT、进程调度、用户态与内核态、线程状态、Redis 线程模型等高频基础题。
-    link: /work/八股
+  - title: Java 基础
+    details: 注解、反射、基本类型、包装类、HashMap 等高频 Java 基础题整理。
+    link: /work/Java
     linkText: 进入
-  - title: Spring 八股
-    details: AOP 限流、全局异常处理、依赖注入等 Spring 面试高频题。
-    link: /work/Spring八股
+  - title: JUC
+    details: 线程安全、线程生命周期、锁、线程池与并发编程核心问题整理。
+    link: /work/JUC
     linkText: 进入
-  - title: 并发八股
-    details: 线程安全、synchronized、volatile 与并发编程基础。
-    link: /work/并发八股
+  - title: JVM
+    details: JVM 内存区域、垃圾回收、CMS 与 G1 等高频 JVM 面试题。
+    link: /work/JVM
     linkText: 进入
   - title: MySQL
-    details: 慢查询定位与优化、索引失效场景等数据库面试题。
+    details: 索引、事务、执行计划、慢查询优化与乐观锁等数据库面试题。
     link: /work/Mysql
     linkText: 进入
   - title: Redis
-    details: Redis 相关面试笔记，当前内容仍在补充中。
+    details: IO 模型、淘汰策略、缓存问题与 Redis 常见高频题整理。
     link: /work/Redis
     linkText: 进入
   - title: 消息队列
-    details: Kafka 生产者如何保证消息不丢失，以及可靠性设计思路。
+    details: Kafka 可靠性、延迟消息、死信队列与 MQ 常见场景总结。
     link: /work/消息队列
     linkText: 进入
+  - title: Spring 八股
+    details: AOP 限流、全局异常处理、依赖注入与 Spring Boot 自动装配。
+    link: /work/Spring八股
+    linkText: 进入
   - title: Spring Cloud
-    details: Spring Cloud 相关笔记与面试整理，当前内容持续补充中。
+    details: 微服务的概念、优缺点与 Spring Cloud 相关基础整理。
     link: /work/Springcloud
     linkText: 进入
-  - title: JVM
-    details: JVM、操作系统、IO 相关笔记与面试问答。
-    link: /work/JVM
-    linkText: 进入
   - title: 操作系统
-    details: kill -9、进程退出、Linux 常用指令等操作系统基础题整理。
+    details: 进程调度、用户态内核态、kill -9 与 Linux 常用命令等。
     link: /work/操作系统
     linkText: 进入
   - title: 计算机网络
-    details: HTTP/HTTPS、状态码与网络基础高频问题整理。
+    details: HTTP/HTTPS、三次握手、状态码与网络基础高频问题整理。
     link: /work/计算机网络
     linkText: 进入
   - title: 设计模式
-    details: 策略模式、工厂模式等常见设计模式笔记，当前内容持续补充中。
+    details: 策略模式、工厂模式等常见设计模式面试题整理。
     link: /work/设计模式
     linkText: 进入
   - title: AI
-    details: RAG 基础流程、知识库检索与生成式问答的入门整理。
+    details: RAG、Agent、Prompt、MCP 与 AI 应用面试题整理。
     link: /work/AI
     linkText: 进入
   - title: LeetCode
@@ -70,7 +70,11 @@ features:
     link: /work/leetcode
     linkText: 进入
   - title: 项目面经
-    details: 项目架构、认证链路、计数系统、RAG 问答等实战复盘。
+    details: 发布流程、认证链路、对象存储、搜索与 RAG 问答等项目复盘。
     link: /work/项目面经
+    linkText: 进入
+  - title: 优秀文章借鉴
+    details: 缓存一致性、Agent 学习资料与后端架构书单整理。
+    link: /work/优秀文章借鉴
     linkText: 进入
 ---
