@@ -80,7 +80,7 @@ HashMap 底层原来是数组加链表。
 
 
 
-### 2.讲讲集合
+### 2.讲讲集合**
 
 一类是 Collection，主要放单个元素，常见的像 List、Set、Queue；另一类是 Map，存键值对。
 List 有序可重复，Set 无序或部分有序但不能重复，Queue 更偏队列场景，Map 就是按 key 找 value。
@@ -118,7 +118,63 @@ ArrayList的扩容操作涉及到数组的复制和内存的重新分配，所�
 
 之所以扩容是 1.5 倍，是因为 1.5 可以充分利用移位操作，减少浮点数或者运算时间和运算次数。
 
+
+
+### 4.使用for循环对ArrayList在遍历的时候进行删除会有什么问题？
+
+ArrayList 底层是数组，删除元素后后面的元素会整体前移。所以用 for 循环边遍历边删，容易出现漏删、漏遍历，严重时还可能下标越界。如果是增强 for，还可能触发并发修改异常。一般删除时更推荐倒序遍历，或者直接用迭代器的 remove 方法。
+
+
+
+###  5.使用Iterator对List集合进行删除操作时会报什么异常？
+
+当使用 Iterator 遍历 List 集合时，如果直接使用 List 的 remove 方法来删除元素，在大多数情况下会抛出 ConcurrentModificationException 异常。
+
+这是因为 List 集合在遍历过程中会维护一个内部的修改计数（modCount）。当通过 List 自身的 remove 方法删除元素时，modCount 会被修改，而 Iterator 在创建时会记录当时的 modCount，在后续遍历过程中会检查 modCount 是否发生变化。如果发生变化，就会认为集合的结构被非法修改，从而抛出异常。
+
+以下是一个使用 ArrayList 和 Iterator 可能会抛出异常的示例：
+
+```java
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+public class ListIteratorRemoveExample {
+    public static void main(String[] args) {
+        List<String> list = new ArrayList<>();
+        list.add("A");
+        list.add("B");
+        list.add("C");
+        Iterator<String> iterator = list.iterator();
+        while (iterator.hasNext()) {
+            String element = iterator.next();
+            if ("B".equals(element)) {
+                list.remove(element);
+                // 这里会抛出ConcurrentModificationException
+            }
+        }
+    }
+}
+
+```
+
+在这个例子中，当遍历到元素 B 时，使用 list.remove(element) 来删除元素。这会导致 list 的 **modCount** 发生改变，而 iterator 在遍历过程中检测到 modCount 与它期望的值不一致，就会抛出 ConcurrentModificationException 异常。
+
+正确的做法是使用 Iterator 本身的 remove 方法来删除元素。Iterator 的 remove 方法会在内部正确地处理 modCount，从而避免抛出异常。
+
+### 6.Iterator 底层原理实现
+
+迭代器本质上就**是一个遍历集合的对象**。在 Java 中，`Iterator` 是一个接口，它定义了遍历集合元素的基本方法。其主要方法包括 `hasNext()` 和 `next()`。`hasNext()` 用于判断集合中是否还有下一个元素，`next()` 用于返回下一个元素。
+
+它内部一般会记录当前遍历到哪个位置，同时还会记录集合被修改的次数。
+每次取下一个元素时，它都会检查集合是不是被别人偷偷改过，如果发现修改次数对不上，就直接报并发修改异常。
+
 ## 异常
+
+当使用 Iterator 遍历 List 集合时，如果直接使用 List 的 remove 方法来删除元素，在大多数情况下会抛出 ConcurrentModificationException 异常。
+
+这是因为 List 集合在遍历过程中**会维护一个内部的修改计数**（modCount）。当通过 List 自身的 remove 方法删除元素时，modCount 会被修改，而 Iterator 在创建时会记录当时的 modCount，在后续遍历过程中会检查 modCount 是否发生变化。如果发生变化，就会认为集合的结构被非法修改，从而抛出异常。
+
+以下是一个使用 ArrayList 和 Iterator 可能会抛出异常的示例：
 
 ### 1.异常怎么处理？throw 和 try-catch-finally 的适用场景？
 
