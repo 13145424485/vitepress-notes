@@ -598,7 +598,7 @@ public int trap(int[] height) {
 
 # 滑动窗口
 
-## 8.无重复字符的最长子串
+## 1.无重复字符的最长子串
 
 [无重复字符的最长子串](https://leetcode.cn/problems/longest-substring-without-repeating-characters/)
 
@@ -641,8 +641,68 @@ public int trap(int[] height) {
 
   
 
-  ## 找到字符串中所有字母异位词
+  ## 2.最小覆盖字串
 
+  https://leetcode.cn/problems/minimum-window-substring/description/
+  
+  ### 滑动数组
+  
+  优化前：
+  
+  ```java
+  class Solution {
+      public String minWindow(String S, String t) {
+          int[] cntS = new int[128]; // s 子串字母的出现次数
+          int[] cntT = new int[128]; // t 中字母的出现次数
+          for (char c : t.toCharArray()) {
+              cntT[c]++;
+          }
+  
+          char[] s = S.toCharArray();
+          int m = s.length;
+          int ansLeft = -1;
+          int ansRight = m;
+          int left = 0;
+  
+          for (int right = 0; right < m; right++) { // 移动子串右端点
+              cntS[s[right]]++; // 右端点字母移入子串
+              while (isCovered(cntS, cntT)) { // 涵盖
+                  if (right - left < ansRight - ansLeft) { // 找到更短的子串
+                      ansLeft = left; // 记录此时的左右端点
+                      ansRight = right;
+                  }
+                  cntS[s[left]]--; // 左端点字母移出子串
+                  left++;
+              }
+          }
+  
+          return ansLeft < 0 ? "" : S.substring(ansLeft, ansRight + 1);
+      }
+  
+      private boolean isCovered(int[] cntS, int[] cntT) {
+          for (int i = 'A'; i <= 'Z'; i++) {
+              if (cntS[i] < cntT[i]) {
+                  return false;
+              }
+          }
+          for (int i = 'a'; i <= 'z'; i++) {
+              if (cntS[i] < cntT[i]) {
+                  return false;
+              }
+          }
+          return true;
+      }
+  }
+  
+  作者：灵茶山艾府
+  ```
+  
+  
+  
+  
+  
+  ## 找到字符串中所有字母异位词
+  
   [找到字符串中所有字母异位词](https://leetcode.cn/problems/find-all-anagrams-in-a-string/)
 
 
