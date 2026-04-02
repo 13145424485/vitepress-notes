@@ -1219,6 +1219,40 @@ class Solution {
 }
 ```
 
+## 二叉树的层序遍历
+
+[102. 二叉树的层序遍历](https://leetcode.cn/problems/binary-tree-level-order-traversal/)
+
+### 两个数组
+
+```java
+class Solution {
+    public List<List<Integer>> levelOrder(TreeNode root) {
+        if(root == null){
+            return List.of();
+        }
+
+        List<List<Integer>> ans = new ArrayList<>();
+        List<TreeNode> cur = List.of(root);
+        while(!cur.isEmpty()){
+            //存储下一个节点
+            List<TreeNode> nxt = new ArrayList<>();
+             // 存当前层所有节点的值，提前指定大小，效率更高
+            List<Integer> vals = new ArrayList<>(cur.size());
+            for(TreeNode node : cur){
+                vals.add(node.val);
+                if(node.left != null) nxt.add(node.left);
+                if(node.right != null) nxt.add(node.right);
+            }
+            //将下一个节点设为当前层
+            cur = nxt;
+            ans.add(vals);
+        }
+        return ans;
+    }
+}
+```
+
 
 
 # 链表
