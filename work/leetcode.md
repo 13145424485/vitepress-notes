@@ -1283,7 +1283,109 @@ class Solution {
 
 ```
 
+## 重排链表
 
+https://leetcode.cn/problems/reorder-list/
+
+### 解法一 存储
+
+链表的缺点就是不能随机存储，当我们想取末尾元素的时候，只能从头遍历一遍，很耗费时间。第二次取末尾元素的时候，又得遍历一遍。
+
+所以先来个简单粗暴的想法，把链表存储到线性表中，然后用双指针依次从头尾取元素即可
+
+```java
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode() {}
+ *     ListNode(int val) { this.val = val; }
+ *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+ * }
+ */
+class Solution {
+    public void reorderList(ListNode head) {
+    if (head == null) {
+        return;
+    }
+    //存到 list 中去
+    List<ListNode> list = new ArrayList<>();
+    while (head != null) {
+        list.add(head);
+        head = head.next;
+    }
+    //头尾指针依次取元素
+    int i = 0, j = list.size() - 1;
+    while (i < j) {
+        list.get(i).next = list.get(j);
+        i++;
+        //偶数个节点的情况，会提前相遇
+        if (i == j) {
+            break;
+        }
+        list.get(j).next = list.get(i);
+        j--;
+    }
+    list.get(i).next = null;
+    }
+}
+```
+
+
+
+
+
+### 递归
+
+```java
+class Solution {
+    public void reorderList(ListNode head) {
+        if(head == null || head.next == null || head.next.next == null){
+            return;
+        }
+        int len = 0;
+        ListNode h = head;
+
+        while(h != null){
+           len++;
+           h = h.next;
+        }
+        reorderListHelper(head, len);
+    }
+
+    private ListNode reorderListHelper(ListNode head ,int len){
+        if(len == 1){
+            ListNode outTail = head.next;
+            head.next = null;
+            return outTail;
+        }
+        if(len == 2){
+             ListNode outTail = head.next.next;
+             head.next.next = null;
+             return outTail;
+        }
+        ListNode tail = reorderListHelper(head.next,len -2);
+        ListNode subHead = head.next;
+        head.next = tail;
+        ListNode outTail = tail.next;
+        tail.next = subHead;
+        return outTail;
+    }
+}
+```
+
+你现在要处理一段链表：
+
+**头节点 🟢 -----> 中间一大块链表 🌱 -----> 尾节点 🔴**
+
+我们要做的就一件事：
+
+**头 接 尾，尾 再接 中间**
+
+变成：
+
+**🟢 -----> 🔴 -----> 🌱**
 
 # 动态规划
 
