@@ -70,7 +70,100 @@ JDK 动态代理和 CGLIB 的核心区别主要在三点：
 
 
 
+## 4.spring三级缓存怎么解决循环依赖问题？
 
+Spring 解决单例循环依赖，是靠**三级缓存**来提前暴露未完成初始化的 Bean 早期引用。
+
+Bean 实例化后先把工厂放入三级缓存，需要时从三级缓存拿到早期引用（原始或代理），放入二级缓存避免重复生成，再反向注入完成互相依赖。最后两个 Bean 都能初始化完成，存入一级缓存。
+
+但这只能解决单例 + Setter / 字段注入的循环依赖，**构造注入和原型模式无法解决**。
+
+
+
+## 事务
+
+### 如何使用spring实现事务？
+
+
+
+Spring 实现事务主要有两种方式：
+
+1. **声明式事务**：用 `@Transactional` 注解，放在方法或类上，Spring 会自动帮我们开启、提交或回滚事务，使用简单，但要注意事务失效的场景，比如方法不是 `public`、内部调用、异常类型不匹配等问题。
+2. **编程式事务**：用 `TransactionTemplate` 手动控制事务，灵活性更高，可以精细控制事务的开启、提交时机，适合事务操作少、需要定制化逻辑的场景，但代码侵入性更强。
+
+实际开发中，大部分场景用声明式事务就够了；如果遇到递归、外部调用这种容易产生长事务的场景，我会把非事务逻辑提前执行，只在数据写入环节开启事务，避免事务过长影响性能。
+
+
+
+#### 1. 声明式事务管理（@Transactional）
+
+通过 `@Transactional` 注解实现事务控制，使用简单，无需手动编写事务代码：
+
+- 方法级别：在方法上添加注解，方法执行前开启事务，执行后提交事务；
+
+  ```java
+  @Service
+  public class TransactionDemo {
+      @Transactional
+      public void declarativeUpdate() {
+          updateOperation1();
+          updateOperation2();
+      }
+  }
+  ```
+
+- 类级别：在类上添加注解，类中所有 public方法都将开启事务；
+
+  ```java
+  @Service
+  @Transactional
+  public class TransactionDemo {
+      public void declarativeUpdate() {
+          updateOperation1();
+          updateOperation2();
+      }
+      // 其他public方法...
+  }
+  ```
+
+#### 2. 编程式事务管理（TransactionTemplate）
+
+通过代码手动控制事务的开启、提交、回滚，灵活性更高：
+
+- Spring 提供 TransactionTemplate简化编程式事务实现；
+
+  ```
+  @Service
+  public class UserService {
+      @Autowired
+      private UserDao userDao;
+      @Autowired
+      private TransactionTemplate transactionTemplate;
+  
+      public void addUser(User user) {
+          transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+              @Override
+              protected void doInTransactionWithoutResult(TransactionStatus status) {
+                  userDao.insert(user);
+                  // 其他数据库操作
+              }
+          });
+      }
+  }
+  ```
+
+#### 3. 两种方式对比
+
+| 对比维度 | 声明式事务                                 | 编程式事务                         |
+| -------- | ------------------------------------------ | ---------------------------------- |
+| 使用方式 | `@Transactional` 注解                      | `TransactionTemplate` 编码         |
+| 优点     | 使用简单，无侵入                           | 控制粒度更细，可灵活控制事务边界   |
+| 缺点     | 使用不当易失效；事务性操作过多易导致长事务 | 代码侵入性强，需要硬编码控制       |
+| 适用场景 | 同一方法中事务操作较多                     | 事务操作数量少、需要精细控制的场景 |
+
+#### 4. 长事务优化建议
+
+对于递归、外部通讯等耗时场景，应避免事务包裹整个流程：将非事务操作前置执行，仅在写入数据的关键环节开启事务，减少长事务带来的锁竞争和性能问题。
 
 
 
