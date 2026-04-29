@@ -1,4 +1,4 @@
-# LeetCode 热题 HOT 100
+LeetCode 热题 HOT 100
 
 # 哈希
 
@@ -1474,13 +1474,433 @@ class Solution {
 
 
 
+## 爬楼梯
+
+
+
+动态规划
+
+我们用 f(x) 表示爬到第 x 级台阶的方案数，考虑最后一步可能跨了一级台阶，也可能跨了两级台阶，所以我们可以列出如下式子：
+
+f(x)=f(x−1)+f(x−2)
+
+它意味着爬到第 x 级台阶的方案数是爬到第 x−1 级台阶的方案数和爬到第 x−2 级台阶的方案数的和。很好理解，因为每次只能爬 1 级或 2 级，所以 f(x) 只能从 f(x−1) 和 f(x−2) 转移过来，而这里要统计方案总数，我们就需要对这两项的贡献求和。
+
+以上是动态规划的转移方程，下面我们来讨论边界条件。我们是从第 0 级开始爬的，所以从第 0 级爬到第 0 级我们可以看作只有一种方案，即 f(0)=1；从第 0 级到第 1 级也只有一种方案，即爬一级，f(1)=1。这两个作为边界条件就可以继续向后推导出第 n 级的正确结果。我们不妨写几项来验证一下，根据转移方程得到 f(2)=2，f(3)=3，f(4)=5，……，我们把这些情况都枚举出来，发现计算的结果是正确的。
+
+我们不难通过转移方程和边界条件给出一个时间复杂度和空间复杂度都是 O(n) 的实现，但是由于这里的 f(x) 只和 f(x−1) 与 f(x−2) 有关，所以我们可以用「滚动数组思想」把空间复杂度优化成 O(1)。下面的代码中给出的就是这种实现。
+
+```java
+class Solution {
+    public int climbStairs(int n) {
+        int p = 0, q = 0, r = 1;
+        for (int i = 1; i <= n; ++i) {
+            p = q; 
+            q = r; 
+            r = p + q;
+        }
+        return r;
+    }
+}
+
+
+```
+
+## 打家劫舍
+
+[198. 打家劫舍](https://leetcode.cn/problems/house-robber/)
+
+- 定义子问题
+- 写出子问题的递推关系
+- 确定 DP 数组的计算顺序
+
+
+
+**步骤一：定义子问题**
+稍微接触过一点动态规划的朋友都知道动态规划有一个 “子问题” 的定义。什么是子问题？子问题是和原问题相似，但规模较小的问题。例如这道小偷问题，原问题是 “从全部房子中能偷到的最大金额”，将问题的规模缩小，子问题就是 “从 k 个房子中能偷到的最大金额 ”，用 f(k) 表示。
+
+![](../image、/work/e05033cebe75baa2d31f1c4a1152343d.png)
+
+
+
+可以看到，子问题是参数化的，我们定义的子问题中有参数 k。假设一共有 n 个房子的话，就一共有 n 个子问题。动态规划实际上就是通过求这一堆子问题的解，来求出原问题的解。这要求子问题需要具备两个性质：
+
+原问题要能由子问题表示。例如这道小偷问题中，k=n 时实际上就是原问题。否则，解了半天子问题还是解不出原问题，那子问题岂不是白解了。
+一个子问题的解要能通过其他子问题的解求出。例如这道小偷问题中，f(k) 可以由 f(k−1) 和 f(k−2) 求出，具体原理后面会解释。这个性质就是教科书中所说的“最优子结构”。如果定义不出这样的子问题，那么这道题实际上没法用动态规划解。
+小偷问题由于比较简单，定义子问题实际上是很直观的。一些比较难的动态规划题目可能需要一些定义子问题的技巧。
+
+**步骤二：写出子问题的递推关系**
+这一步是求解动态规划问题最关键的一步。然而，这一步也是最无法在代码中体现出来的一步。在做题的时候，最好把这一步的思路用注释的形式写下来。做动态规划题目不要求快，而要确保无误。否则，写代码五分钟，找 bug 半小时，岂不美哉？
+
+我们来分析一下这道小偷问题的递推关系：
+
+假设一共有 n 个房子，每个房子的金额分别是 H0,H1,…,H n−1子问题 f(k) 表示从前 k 个房子（即 H0 ,H1 ,…,H k−1 ）中能偷到的最大金额。那么，偷 k 个房子有两种偷法：
+
+![](../image、/work/9cd5325ff855c64ee04d119f8253bb83.png)
+
+k 个房子中最后一个房子是 Hk−1。如果不偷这个房子，那么问题就变成在前 k−1 个房子中偷到最大的金额，也就是子问题 f(k−1)。如果偷这个房子，那么前一个房子 Hk−2。显然不能偷，其他房子不受影响。那么问题就变成在前 k−2 个房子中偷到的最大的金额。
+
+两种情况中，选择金额较大的一种结果。
+
+f(k)=max{f(k−1),Hk−1 +f(k−2)}
+
+在写递推关系的时候，要注意写上 k=0 和 k=1 的基本情况：当 k=0 时，没有房子，所以 f(0)=0。当 k=1 时，只有一个房子，偷这个房子即可，所以 f(1)=H0。
+
+
+
+**三：确定 DP 数组的计算顺序**
+
+所以dp[k-2]是k-3到0之间的金额。而nums[k-1]是最后一个房间的金额。
+
+```java
+
+
+class Solution {
+    public int rob(int[] nums) {
+        if(nums.length == 0){
+            return 0;
+        }
+        int cou = nums.length;
+        int[] dp = new int[cou+1];
+        dp[0] = 0;
+        dp[1] = nums[0];
+        for(int k = 2; k <= cou ; k++){
+            dp[k] = Math.max(dp[k-1],nums[k-1]+dp[k-2]);
+        }
+        return dp[cou];
+    }
+}
+```
+
+## 单词拆分-完全背包
+
+[139. 单词拆分](https://leetcode.cn/problems/word-break/)
+
+### 记忆化搜索
+
+```java
+class Solution {
+    public boolean wordBreak(String s, List<String> wordDict) {
+        int maxLen = 0;
+        for(String word : wordDict){
+            maxLen = Math.max(maxLen,word.length());
+        }
+        Set<String> word = new HashSet<>(wordDict);
+        int n =  s.length();
+        int[] memo = new int[n+1];
+        Arrays.fill(memo,-1);
+        return dfs(n, maxLen, s, word, memo) == 1;
+    }
+    private int dfs(int i,int maxLen,String s ,Set<String> word ,int[] memo){
+        if(i == 0){
+            return 1;
+        }
+        if(memo[i] != -1){
+            return memo[i];
+        }
+        for (int j = i - 1; j >= Math.max(i - maxLen, 0); j--) {
+            //判断这个截取出来的子串，是否在单词字典里
+            if (word.contains(s.substring(j, i)) && dfs(j, maxLen, s, word, memo) == 1) {
+                return memo[i] = 1; // 记忆化
+            }
+        }
+        return memo[i] = 0;
+    }
+
+}
+```
+
+
+
+题目要求返回 **true / false**
+
+但 **memo 不用 boolean，而是用 int 存 1、0、-1**
+
+原因只有一个：
+
+**boolean 只有两种状态，不够用，需要三种状态！**
+
+------
+
+为什么必须用 int，不能用 boolean？
+
+boolean 只有：
+
+- true
+- false
+
+但我们的**记忆化需要 3 个状态**：
+
+1. **-1 = 还没算过**
+2. **1 = 可以拆分（true）**
+3. **0 = 不可以拆分（false）**
 
 
 
 
 
+### HashSet常用函数：
+
+`set.add("apple");`添加
+
+`set.contains("apple");`判断是否包含元素
+
+`String[] arr = set.toArray(new String[0]);` 转成数组
+
+`set.size();`获取元素个数
+
+**转数组后有什么作用？**
+
+**需要按顺序遍历 / 随机访问**：
+
+​    Set 本身**没有下标**，不能 `set.get(i)`
+
+​    转成数组就能用 `arr[i]` 随便取
+
+**题目要求返回数组类型**：
+
+​    比如题目让返回去重后的结果，类型是 `int[]` / `String[]`
+
+​    你用 Set 去重完，必须转数组返回
+
+**方便排序**：
+
+  Set 不保证顺序
+
+   转数组后可以 `Arrays.sort(arr)` 排序
 
 
+
+### 递推：
+
+```java
+class Solution {
+    public boolean wordBreak(String s, List<String> wordDict) {
+        int maxLen = 0;
+        for (String word : wordDict) {
+            maxLen = Math.max(maxLen, word.length());
+        }
+        Set<String> words = new HashSet<>(wordDict);
+
+        int n = s.length();
+        boolean[] f = new boolean[n + 1];
+        f[0] = true;
+        for (int i = 1; i <= n; i++) {
+            for (int j = i - 1; j >= Math.max(i - maxLen, 0); j--) {
+                if (f[j] && words.contains(s.substring(j, i))) {
+                    f[i] = true;
+                    break;
+                }
+            }
+        }
+        return f[n];
+    }
+}
+
+```
+
+i：要判断的字符串长度
+
+j：尝试在 j 位置切一刀
+
+看前半段能不能拆 + 后半段是不是单词
+
+# 动态规划0-1背包 
+
+## 零钱兑换
+
+[322. 零钱兑换](https://leetcode.cn/problems/coin-change/)
+
+### 递归搜索 + 保存计算结果 = 记忆化搜索
+
+```java
+class Solution {
+    public int coinChange(int[] coins, int amount) {
+        int n =coins.length;
+        int [][] memo = new int [n][amount+1];
+        for(int[] row:memo){
+            Arrays.fill(row,-1);
+        }
+        int ans = dfs(n - 1, amount, coins, memo);
+        return ans < Integer.MAX_VALUE / 2 ? ans : -1;
+    }
+
+
+    private int dfs(int i,int c,int[] coins,int[][] memo){
+        if(i < 0){
+            return c == 0 ? 0 :Integer.MAX_VALUE / 2;
+        }
+        //记忆化
+        if(memo[i][c] != -1){
+            return memo[i][c];
+        }
+        //第二段：钱不够，不能选当前硬币
+        if(c < coins[i]){
+            return memo[i][c] = dfs(i-1,c,coins,memo);
+        }
+        //不选当前硬币：不用第 i 个硬币，只用前面 i-1 种硬币凑 c 元。
+        //选当前硬币：用掉 1 个硬币 → +1，剩下要凑的钱：c - coins[i]，硬币还能再选（无限硬币）→ i 不变
+        //在「选」和「不选」里，取硬币数量更少的那个方案。
+       return memo[i][c] = Math.min(dfs(i - 1, c, coins, memo), dfs(i, c - coins[i], coins, memo) + 1);
+    }
+}
+```
+
+### 递推
+
+```java
+class Solution {
+    public int coinChange(int[] coins, int amount) {
+        int n = coins.length;
+        int[][] f = new int[n + 1][amount + 1];
+        Arrays.fill(f[0], Integer.MAX_VALUE / 2);
+        f[0][0] = 0;
+        for(int i = 0; i < n;i++){
+            for(int c = 0; c <= amount ;c++){
+                if(c < coins[i]){
+                    f[i+1][c] = f[i][c];
+                }else{
+                    f[i + 1][c] = Math.min(f[i][c], f[i + 1][c - coins[i]] + 1);
+                }
+            }
+        }
+        int ans = f[n][amount];
+        return ans < Integer.MAX_VALUE / 2 ? ans : -1;
+    }
+}
+```
+
+### 空间优化，二维数组
+
+(滚动数组)
+
+## 最长递增子序列
+
+记忆化
+
+```java
+class Solution {
+    public int lengthOfLIS(int[] nums) {
+        int n = nums.length;
+        int[] memo = new int[n]; // 本题可以初始化成 0，表示没有计算过
+        int ans = 0;
+        //遍历数组里每一个数字，让它当一次 “子序列的最后一位”，然后把最长的那个记下来
+        for (int i = 0; i < n; i++) {
+            ans = Math.max(ans, dfs(i, nums, memo));
+        }
+        return ans;
+    }
+
+    private int dfs(int i, int[] nums, int[] memo) {
+        if (memo[i] > 0) { // 之前计算过
+            return memo[i];
+        }
+        int res = 0;
+        for (int j = 0; j < i; j++) {
+            if (nums[j] < nums[i]) {
+                res = Math.max(res, dfs(j, nums, memo));
+            }
+        }
+        //res = 前面最长的子序列长度（还没算 nums [i] 自己）
+        res++; // 加一提到循环外面
+        return memo[i] = res;
+    }
+}
+
+```
+
+递推
+
+```java
+class Solution {
+    public int lengthOfLIS(int[] nums) {
+        int n = nums.length;
+        int[] f = new int[n];
+        int ans =0;
+        for(int i = 0; i < n ;i++){
+            for(int j = 0 ; j < i ;j++){
+                if(nums[j] < nums[i]){
+                    f[i] = Math.max(f[i],f[j]);
+                }
+            }
+            ans = Math.max(ans, ++f[i]);
+        }
+        return ans;
+    }
+
+}
+```
+
+贪心＋二分
+
+写法一：写了额外的空间
+
+```java
+class Solution {
+    public int lengthOfLIS(int[] nums) {
+        List<Integer> g = new ArrayList<>();
+        for(int x : nums){
+            int j = lowerBoud(g,x);
+        
+        //j == g.size () → 说明 x 最大 → 直接加，长度 + 1
+        if(j == g.size()){
+            g.add(x);
+        }else{
+            //如果有更小的那么替换
+            g.set(j,x);
+        }
+        }
+        return g.size();
+    }
+    private int lowerBoud(List<Integer> g,int target){
+        int left = -1,right = g.size();
+        int mid = left + (right - left) / 2;
+        while(left + 1 < right){
+            if(g.get(mid) < target){
+                left = mid;
+            }else{
+                right = mid;
+            }
+        }
+        return right; 
+    }
+}
+```
+
+但是会超出时间
+
+
+
+写法二：直接将g写在nums里面
+
+```java
+class Solution {
+    public int lengthOfLIS(int[] nums) {
+        int ng = 0;
+        for(int x : nums){
+            int j = lowerBoud(nums,ng,x);
+            nums[j] = x;
+            if(j==ng){
+                ng++;
+            }
+        }
+        return ng;
+    }
+    private int lowerBoud(int nums[],int right,int target){
+        int left = -1;
+        
+        while(left + 1 < right){
+            int mid = left + (right - left) / 2;
+            if(nums[mid] < target){
+                left = mid;
+            }else {
+                right = mid; // 范围缩小到 (left, mid)
+            }
+        }
+        return right; 
+    }
+}
+```
 
 
 
@@ -1530,4 +1950,6 @@ class MyQueue {
 }
 
 ```
+
+
 

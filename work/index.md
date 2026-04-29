@@ -4,7 +4,7 @@ layout: home
 hero:
   name: "面试与项目"
   text: "Java 八股、项目复盘与刷题记录"
-  tagline: "Java、JUC、JVM、MySQL、Redis、消息队列、Spring、微服务、操作系统、计算机网络、设计模式、AI、LeetCode、项目面经"
+  tagline: "Java、JUC、JVM、MySQL、Redis、ElasticSearch、消息队列、Spring、微服务、操作系统、计算机网络、设计模式、AI、ReAct、Transformer、LeetCode、项目面经"
   actions:
     - theme: brand
       text: Java 基础
@@ -37,6 +37,10 @@ features:
     details: IO 模型、淘汰策略、缓存问题与 Redis 常见高频题整理。
     link: /work/Redis
     linkText: 进入
+  - title: ElasticSearch
+    details: 全文检索、倒排索引、分词器，以及 Kafka 消息可靠性与重复消费问题整理。
+    link: /work/ElasticSearch
+    linkText: 进入
   - title: 消息队列
     details: Kafka 可靠性、延迟消息、死信队列与 MQ 常见场景总结。
     link: /work/消息队列
@@ -54,7 +58,7 @@ features:
     link: /work/操作系统
     linkText: 进入
   - title: 计算机网络
-    details: HTTP/HTTPS、三次握手、状态码与网络基础高频问题整理。
+    details: HTTP/HTTPS、Nginx、TCP/UDP、三次握手、四次挥手、TIME_WAIT、DNS、IO 模型与粘包拆包等高频问题整理。
     link: /work/计算机网络
     linkText: 进入
   - title: 设计模式
@@ -64,6 +68,14 @@ features:
   - title: AI
     details: RAG、Agent、Prompt、MCP 与 AI 应用面试题整理。
     link: /work/AI
+    linkText: 进入
+  - title: ReAct
+    details: ReAct 核心循环、LangChain/LangGraph 示例、Agent 工程设计、评测与成本优化。
+    link: /work/ReAct
+    linkText: 进入
+  - title: Transformer
+    details: Transformer 模型相关笔记入口，当前文件已创建，后续补充内容后继续完善。
+    link: /work/transformer
     linkText: 进入
   - title: LeetCode
     details: 常见题型、Java 解法与刷题过程中的方法总结。
