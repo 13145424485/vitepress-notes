@@ -1,4 +1,12 @@
-LeetCode 热题 HOT 100
+**LeetCode** 热题 HOT 100
+
+**获得长度**
+
+数组：nums.length;
+
+List集合：.size()
+
+字符串：int len = s.length();
 
 # 哈希
 
@@ -382,6 +390,35 @@ https://leetcode.cn/problems/move-zeroes/description/
 
 
 
+
+
+
+
+
+
+**简化版**
+
+```java
+class Solution {
+    public void moveZeroes(int[] nums) {
+        int i0 = 0;
+        for (int i = 0; i < nums.length; i++) {
+            if (nums[i] != 0) {
+                // 交换 nums[i] 和 nums[i0]
+                int tmp = nums[i];
+                nums[i] = nums[i0];
+                nums[i0] = tmp;
+                i0++;
+            }
+        }
+    }
+}
+
+
+```
+
+
+
 ## 5.盛最多水的容器
 
 [盛最多水的容器](https://leetcode.cn/problems/container-with-most-water/)
@@ -699,62 +736,38 @@ public int trap(int[] height) {
   
   
   
-  
-  
   ## 找到字符串中所有字母异位词
   
   [找到字符串中所有字母异位词](https://leetcode.cn/problems/find-all-anagrams-in-a-string/)
 
-
+方法一：定长滑窗
 
 ```java
-import java.util.HashMap;
-import java.util.Map;
+class Solution {
+    public List<Integer> findAnagrams(String s, String p) {
+        int[] cunP = new int[26];
+        for(char c : p.toCharArray()){
+            cunP[c- 'a']++;
+        }//先找出p中的每一个字符的数量
 
-public class SlidingWindowTemplate {
-
-    /* 滑动窗口算法框架 */
-    public static void slidingWindow(String s, String t) {
-        Map<Character, Integer> need = new HashMap<>();
-        Map<Character, Integer> window = new HashMap<>();
-
-        for (char c : t.toCharArray()) {
-            need.put(c, need.getOrDefault(c, 0) + 1);
-        }
-
-        int left = 0, right = 0;
-        int valid = 0;
-
-        while (right < s.length()) {
-            // c 是将移入窗口的字符
-            char c = s.charAt(right);
-            // 右移窗口
-            right++;
-            // 进行窗口内数据的一系列更新
-            // ...
-
-            /*** debug 输出的位置 ***/
-            System.out.printf("window: [%d, %d)%n", left, right);
-            /********************/
-
-            // 判断左侧窗口是否要收缩
-            while (windowNeedsShrink()) {
-                // d 是将移出窗口的字符
-                char d = s.charAt(left);
-                // 左移窗口
-                left++;
-                // 进行窗口内数据的一系列更新
-                // ...
+        List<Integer> ans = new ArrayList<>();
+        int [] cunS  = new int[26];
+        for(int right = 0;right < s.length();right++){
+            cunS[s.charAt(right) - 'a']++;
+            int left = right - p.length() + 1;
+            if(left < 0){
+                continue;
             }
+            if(Arrays.equals(cunP,cunS)){
+                ans.add(left);
+            }
+        cunS[s.charAt(left) - 'a']--;//窗口向右滑动，最左侧字符不再属于当前窗口，把它从窗口的字符统计里删掉。删掉后在新的一轮循环中的再加上
+
         }
+        return ans;
     }
 
-    // 占位方法：按具体题目实现收缩条件
-    private static boolean windowNeedsShrink() {
-        return false;
-    }
 }
-
 ```
 
 
@@ -820,8 +833,8 @@ class Solution {
   - 对于数组中的任意位置`i`，前缀和`pre[i]`表示数组中的第`1`个元素到第`i`个元素的总和。
   - 前缀和`pre[j]`表示数组中的第`1`个元素到第`j`个元素的总和。
   - 假定`j > i`，那么`pre[j] - pre[i]`就是第`i+1`个元素到第`j`个元素的总和。
-- 那么对于这个问题，我们可以转化为：求解两个前缀和之差等于k的情况。
-- 通过遍历数组，计算每个位置的前缀和，同时使用一个哈希表来存储每个前缀和出现的次数，同时在遍历数组的过程中，我们判断哈希表中是否存在`prefix[j] - k`的前缀和，并累加其出现次数，即为结果。
+- 那么对于这个问题，我们可以转化为：求解**两个前缀和之差等于k**的情况。
+- 通过遍历数组，计算每个位置的前缀和，同时使用一个哈希表来存储每个前缀和出现的次数，同时在遍历数组的过程中，我们判断哈希表中是否存在`prefix[j] - k`的前缀和，并累加其出现次数，即为结果。                                                                                                                                                                                                                                                                                                                       
 
 ```java
 class Solution {
@@ -844,6 +857,14 @@ class Solution {
         return res;
     }
 }
+//getOrDefault(prefixSum, 0)
+//如果哈希表中存在这个 key（prefixSum）：返回 key 对应的 value（该前缀和之前出现过的总次数）
+//如果哈希表中不存在这个 key：直接返回你写的第二个参数 0
+
+map.put( key , value );
+put 的作用：往 HashMap 里面存入一组【键值对】。
+如果这个 key 之前不存在：直接新增这一条记录
+如果这个 key 已经存在：用新的 value，覆盖掉原来旧的 value
 ```
 
 ## 10.滑动窗口最大值
@@ -1295,6 +1316,8 @@ class Solution {
 
 # 链表
 
+`ListNode` 是**单链表节点**，算法刷题（LeetCode）最常用的数据结构，多用于链表题目（两数相加、反转链表、快慢指针等）
+
 ## 旋转链表
 
 [旋转链表](https://leetcode.cn/problems/rotate-list/)
@@ -1425,6 +1448,453 @@ class Solution {
 
 **🟢 -----> 🔴 -----> 🌱**
 
+
+
+
+
+## 双向链表
+
+### LRU缓存池
+
+#### 手写双向链表
+
+```java
+class LRUCache {
+
+    private static class Node{
+        int key,value;
+        Node pre, next;
+
+        Node(int k ,int v){
+            key = k;
+            value = v;
+
+        }
+    }
+    private final int capacity;
+    private final Node dum = new Node(0,0);
+    private final Map<Integer,Node> keyToNode = new HashMap<>();
+
+    public LRUCache(int capacity) {
+        this.capacity = capacity;
+        dum.pre = dum;
+        dum.next = dum;
+    }
+    
+    public int get(int key) {
+        Node node = getNode(key);
+        return node != null ?node.value : -1;
+    }
+    
+    public void put(int key, int value) {
+        Node node = getNode(key);
+        if(node != null){
+            node.value = value;
+            return ;
+        }
+        node  = new Node(key,value);
+        keyToNode.put(key,node);
+        pushFrist(node);
+        if(keyToNode.size() > capacity){
+           Node backNode = dum.pre;
+           keyToNode.remove(backNode.key);
+           remove(backNode);
+        }
+    }
+
+    private Node getNode(int key){
+        if(!keyToNode.containsKey(key)){
+            return null;
+        }
+        Node node = keyToNode.get(key);
+        remove(node);
+        pushFrist(node);
+        return node;
+    }
+
+    private void pushFrist(Node x){
+        x.pre = dum;
+        x.next = dum.next;
+        x.pre.next = x;
+        x.next.pre = x;
+    }
+
+    private void remove(Node x){
+        x.pre.next = x.next;
+        x.next.pre = x.pre;
+    }
+}
+
+/**
+ * Your LRUCache object will be instantiated and called as such:
+ * LRUCache obj = new LRUCache(capacity);
+ * int param_1 = obj.get(key);
+ * obj.put(key,value);
+ */   手写双向链表的写法是将最新的放在第一，标准库写法则相反。
+```
+
+#### 标准库写法
+
+```
+class LRUCache {
+    private final int capacity;
+    private final Map<Integer,Integer> cache = new LinkedHashMap<>();
+
+
+    public LRUCache(int capacity) {
+        this.capacity = capacity;
+    }
+    
+    public int get(int key) {
+        Integer value  = cache.remove(key);
+        if(value != null){
+            cache.put(key,value);
+            return value;
+        }
+        return -1;
+
+    }
+    
+    public void put(int key, int value) {
+        if(cache.remove(key) != null){
+            cache.put(key,value);
+            return;
+        }
+        if(cache.size() == capacity){
+            Integer eldestKey = cache.keySet().iterator().next();
+            cache.remove(eldestKey);
+        }
+        cache.put(key,value);
+    }
+}
+
+/**
+ * Your LRUCache object will be instantiated and called as such:
+ * LRUCache obj = new LRUCache(capacity);
+ * int param_1 = obj.get(key);
+ * obj.put(key,value);
+ */
+```
+
+`cache.keySet().iterator().next()
+//       ↑           ↑         ↑
+//    按顺序的清单  指向开头   拿到第一个 = 最老的`
+
+
+
+keySet() 拿到所有 key 组成的集合，iterator() 拿到一个"指针"，指向清单的开头，next() 读取指针当前位置的元素，并把指针移到下一位 读出第一个书名号，手指移到下一个
+
+
+
+
+
+在 LinkedHashMap 中：
+
+- 第一个 = 最久未使用的（最老的）
+- 最后一个 = 最新使用的
+
+
+
+## 快慢指针
+
+### 删除链表的倒数第N个节点
+
+[删除链表的倒数第 N 个结点](https://leetcode.cn/problems/remove-nth-node-from-end-of-list/)
+
+
+
+**暴力写法**
+
+```java
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode() {}
+ *     ListNode(int val) { this.val = val; }
+ *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+ * }
+ */
+class Solution {
+    public ListNode removeNthFromEnd(ListNode head, int n) {
+        ListNode dum = new ListNode(0,head);
+        ListNode left = dum;
+        int len = getLength(head);
+        int steep = len - n ;
+
+        
+        while(steep-- >0){
+            left = left.next;
+        }
+        left.next = left.next.next;
+        
+
+        return dum.next;
+    }
+
+    public static int getLength(ListNode head) {
+    int cnt = 0;
+    ListNode cur = head;
+    while (cur != null) {
+        cnt++;
+        cur = cur.next;
+    }
+    return cnt;
+}
+}
+```
+
+ 先写一个函数获得链表的长度，然后再去处理。
+
+
+
+**快慢双指针写法**
+
+```java
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode() {}
+ *     ListNode(int val) { this.val = val; }
+ *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+ * }
+ */
+class Solution {
+    public ListNode removeNthFromEnd(ListNode head, int n) {
+        ListNode dum = new ListNode(0,head);
+        ListNode left = dum;
+        ListNode right = dum;
+        while(n-->0){
+            right= right.next;
+        }
+        while(right.next != null){
+            right = right.next;
+            left = left.next;
+        }
+        left.next = left.next.next;
+        return dum.next;
+        
+    };
+}
+```
+
+## 链表反转
+
+### 两两交换链表中的节点
+
+[4. 两两交换链表中的节点](https://leetcode.cn/problems/swap-nodes-in-pairs/)
+
+```java
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode() {}
+ *     ListNode(int val) { this.val = val; }
+ *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+ * }
+ */
+class Solution {
+    public ListNode swapPairs(ListNode head) {
+        ListNode dum = new ListNode(0, head);
+        ListNode node0 = dum;
+        ListNode node1 = head;
+        while(node1 != null && node1.next != null){
+            ListNode node2 = node1.next;
+            ListNode node3 = node2.next;
+
+            node0.next = node2;
+            node2.next = node1;
+            node1.next = node3;
+
+            node0 = node1;
+            node1 =node3;
+        }
+        return dum.next;
+    }
+}
+```
+
+## 随机链表的复制
+
+[138. 随机链表的复制](https://leetcode.cn/problems/copy-list-with-random-pointer/)
+
+方法一：哈希表
+利用哈希表的查询特点，考虑构建 原链表节点 和 新链表对应节点 的键值对映射关系，再遍历构建新链表各节点的 next 和 random 引用指向即可。
+
+```java
+/*
+// Definition for a Node.
+class Node {
+    int val;
+    Node next;
+    Node random;
+
+    public Node(int val) {
+        this.val = val;
+        this.next = null;
+        this.random = null;
+    }
+}
+*/
+
+class Solution {
+    public Node copyRandomList(Node head) {
+        if(head == null) return null;
+        Node cur = head;
+        Map<Node,Node> map = new HashMap<>();
+
+        while(cur != null){
+            map.put(cur,new Node(cur.val));
+            cur =cur.next;
+        }
+        cur = head;
+        //重新构建新的链表的指向
+        while(cur != null){
+            map.get(cur).next = map.get(cur.next);
+            map.get(cur).random = map.get(cur.random);
+            cur = cur.next;
+        }
+        //返回新链表的头节点
+        //head 是原链表头节点对象，map 里存的映射规则是：原节点 → 它对应的全新复制节点
+        return map.get(head);
+    }
+}
+```
+
+| key（原节点） | value（全新复制节点） |
+| ------------- | --------------------- |
+| A             | A'（A 的拷贝）        |
+| B             | B'（B 的拷贝）        |
+| C             | C'（C 的拷贝）        |
+
+`方法二：拼接 + 拆分`
+考虑构建 `原节点 1 -> 新节点 1 -> 原节点 2 -> 新节点 2 -> ……` 的拼接链表，如此便可在访问原节点的 `random` 指向节点的同时找到新对应新节点的 `random` 指向节点。
+
+**算法流程：**
+1.复制各节点，构建拼接链表：`设原链表为 node1→node2→⋯ ，`构建的拼接链表如下所示：
+`node1→node1new→node2→node2new→⋯`
+构建新链表各节点的 `random` 指向：当访问原节点 `cur` 的随机指向节点 `cur.random` 时，对应新节点 `cur.next` 的随机指向节点为 `cur.random.next` 。
+
+拆分原 / 新链表：设置 pre / cur 分别指向原 / 新链表头节点，遍历执行 pre.next = pre.next.next 和 cur.next = cur.next.next 将两链表拆分开。
+
+返回新链表的头节点 res 即可。
+
+```Java
+class Solution {
+    public Node copyRandomList(Node head) {
+        if(head == null) return null;
+        Node cur = head;
+        // 1. 复制各节点，并构建拼接链表
+        while(cur != null) {
+            Node tmp = new Node(cur.val);
+            tmp.next = cur.next;
+            cur.next = tmp;
+            cur = tmp.next;
+        }
+        // 2. 构建各新节点的 random 指向
+        cur = head;
+        while(cur != null) {
+            if(cur.random != null)
+                cur.next.random = cur.random.next;//拷贝节点的 random，要指向「原节点 random 指向的那个原节点的拷贝节点
+           //举实例：
+//原链表关系：A.random = C
+//插入后结构：A→A'→B→B'→C→C'
+//我们希望：A'.random = C'
+            cur = cur.next.next;//cur = cur.next.next 的作用：跳过中间的拷贝节点，直接走到下一个原节点
+        }
+        // 3. 拆分两链表
+        cur = head.next;
+        Node pre = head, res = head.next;
+        while(cur.next != null) {
+            pre.next = pre.next.next;
+            cur.next = cur.next.next;
+            pre = pre.next;
+            cur = cur.next;
+        }
+        pre.next = null; // 单独处理原链表尾节点
+        return res;      // 返回新链表头节点
+    }
+}
+```
+
+## 排序链表
+
+[148. 排序链表](https://leetcode.cn/problems/sort-list/)
+
+方法一：归并排序（分治）
+1.找到链表的中间结点 head 2的前一个节点，并断开 head 2 与其前一个节点的连接。这样我们就把原链表均分成了两段更短的链表。
+2.分治，递归调用 sortList，分别排序 head（只有前一半）和 head2 。
+3.排序后，我们得到了两个有序链表，那么合并两个有序链表，得到排序后的链表，返回链表头节点。原理见 我的题解。
+
+```java
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode() {}
+ *     ListNode(int val) { this.val = val; }
+ *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+ * }
+ */
+class Solution {
+    public ListNode sortList(ListNode head) {
+        if(head == null || head.next == null){
+            return head;
+        }
+        ListNode head2 = midleNode(head);
+
+        //分治
+        head = sortList(head);
+        head2 = sortList(head2);
+
+        return mergeTwoLists(head, head2);
+
+        //合并
+    }
+
+    //找中心点
+    private ListNode midleNode(ListNode head){
+        ListNode pre = head,slow = head,fast = head;
+        while(fast !=null && fast.next !=null){
+            pre  = slow;
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        pre.next = null;
+        return slow;
+        
+    }
+
+    private ListNode mergeTwoLists(ListNode list1,ListNode list2){
+        ListNode dummy = new ListNode();
+        ListNode cur = dummy;
+        while(list1 != null && list2 != null){
+            if(list1.val < list2.val){
+                cur.next = list1;// 把 list1 加到新链表中
+                list1 = list1.next;
+            }else{
+                cur.next = list2;
+                list2 = list2.next;
+            }
+            cur = cur.next;//是我们拼接出来的新链表的尾部指针，永远指向当前最后一个节点。
+        }
+        cur.next = list1 !=null ? list1 : list2;
+        //while (l1 != null && l2 != null) 只有两个链表都还有节点时才会执行。
+//一旦其中一条链表提前遍历完（变成 null），循环停止。
+//此时会剩下另一条没遍历完的有序链表，剩下的所有节点都可以直接拼在新链表尾部，不需要逐个对比。
+        return dummy.next;
+    }
+}
+```
+
+
+
 # 动态规划
 
 ## 最小路径和
@@ -1505,6 +1975,56 @@ class Solution {
 
 
 ```
+
+## 乘积最大数组
+
+[152. 乘积最大子数组](https://leetcode.cn/problems/maximum-product-subarray/)
+
+
+
+### 状态定义与状态转移方程
+
+上面两个例子启发我们，需要在遍历 *nums* 的同时，维护两个信息：
+
+- 右端点下标为 *i* 的子数组的最大乘积，记作 *f**max*[*i*]。
+- 右端点下标为 *i* 的子数组的最小乘积，记作 *f**min*[*i*]。
+
+设 *x*=*nums*[*i*]，分类讨论：
+
+- *x* 单独组成一个子数组，那么 *f**max*[*i*]=*x*。
+
+- *x* 和前面的子数组拼起来，也就是在右端点下标为 *i*−1 的乘积最大子数组之后添加 *x*，那么 *f**max*[*i*]=*f**max*[*i*−1]⋅*x*；也可以在右端点下标为 *i*−1 的乘积最小子数组之后添加 *x*，那么 *f**max*[*i*]=*f**min*[*i*−1]⋅*x*。把这两种都算一下，这样我们就无需判断 *x* 到底是正还是负了
+
+  三种情况取最大值，得*f**max*[*i*]=max(*f**max*[*i*−1]⋅*x*,*f**min*[*i*−1]⋅*x*,*x*)
+
+  同理得:
+
+  *f**min*[*i*]=min(*f**max*[*i*−1]⋅*x*,*f**min*[*i*−1]⋅*x*,*x*)
+
+  由于以 *nums*[0] 为右端点的子数组乘积只能是 *nums*[0]，所以初始值为 *f**max*[0]=*f**min*[0]=*nums*[0]。
+
+  
+
+```java
+class Solution {
+    public int maxProduct(int[] nums) {
+        int n = nums.length;
+        int[] fMax = new int[n];
+        int[] fMin = new int[n];
+        fMax[0] = fMin[0] = nums[0];
+
+        for(int i = 1;i < n ;i++){
+            int x = nums[i];
+
+            fMax[i] = Math.max(Math.max(fMax[i - 1] * x, fMin[i - 1] * x), x);
+            fMin[i] = Math.min(Math.min(fMax[i - 1] * x, fMin[i - 1] * x), x);
+        }
+         return Arrays.stream(fMax).max().getAsInt();
+    }
+}
+```
+
+
 
 ## 打家劫舍
 
@@ -1711,7 +2231,7 @@ j：尝试在 j 位置切一刀
 
 [322. 零钱兑换](https://leetcode.cn/problems/coin-change/)
 
-### 递归搜索 + 保存计算结果 = 记忆化搜索
+#### 递归搜索 + 保存计算结果 = 记忆化搜索
 
 ```java
 class Solution {
@@ -1746,7 +2266,7 @@ class Solution {
 }
 ```
 
-### 递推
+#### 递推
 
 ```java
 class Solution {
@@ -1770,9 +2290,88 @@ class Solution {
 }
 ```
 
-### 空间优化，二维数组
+#### 空间优化，二维数组
 
 (滚动数组)
+
+##  完全平方数
+
+[279. 完全平方数](https://leetcode.cn/problems/perfect-squares/)
+
+```java
+class Solution {
+    private static final int[][] memo = new int[101][100001];
+//静态代码块，每一次程序的一开始将数组内的值设为-1
+    static{
+        for(int[] row:memo){
+            Arrays.fill(row,-1);
+        }
+    }
+
+    private static int dfs(int i,int j){
+        if(i == 0){
+            return j ==0? 0 : Integer.MAX_VALUE;
+        }
+        if(memo[i][j] != -1){
+            return memo[i][j];
+        }
+        if(j < i * i){
+            return memo[i][j] = dfs(i-1,j);
+        }
+        return memo[i][j] = Math.min(dfs(i-1,j),dfs(i,j-i*i)+1);
+    }
+    public int numSquares(int n) {
+        return dfs((int) Math.sqrt(n), n);
+    }
+}
+```
+
+## 分割等和子集
+
+
+
+```java
+class Solution {
+    public boolean canPartition(int[] nums) {
+        int s = 0;
+        for (int x : nums) {
+            s += x;
+        }
+        if (s % 2 != 0) {
+            return false;
+        }
+
+        int n = nums.length;
+
+        int[][] memo = new int[n][s/2+1];
+        for(int [] row:memo){
+            Arrays.fill(row,-1);
+        }
+
+        return dfs(n-1, s/2,nums,memo);
+        
+    }
+    private boolean dfs(int i,int j,int[] nums,int[][] memo){
+        if(i < 0){
+            return j == 0;
+        }
+        if(memo[i][j] != -1){ //之前计算过
+            return memo[i][j] == 1;
+        }
+
+        boolean res;
+        if(j < nums[i]){//不选
+            res = dfs(i-1 ,j ,nums,memo);
+        }else{
+            res = dfs(i-1,j-nums[i],nums,memo) || dfs(i - 1, j, nums, memo);//因为是01背包问题，所以选不选都不能选当前的数字了
+        }
+        memo[i][j] = res?1:0;
+        return res;
+    }
+}
+```
+
+
 
 ## 最长递增子序列
 
@@ -1952,4 +2551,70 @@ class MyQueue {
 ```
 
 
+
+# 手撕代码:基于阻塞队列实现一个简单的生产者-消费者模型
+
+```java
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+
+public class ProducerConsumerDemo {
+
+    private static final BlockingQueue<Integer> QUEUE =
+            new ArrayBlockingQueue<>(10);
+
+    // 使用特殊值通知消费者结束
+    private static final int END = -1;
+
+    static class Producer implements Runnable {
+        @Override
+        public void run() {
+            try {
+                for (int i = 1; i <= 20; i++) {
+                    QUEUE.put(i);
+                    System.out.println("生产：" + i);
+                }
+
+                QUEUE.put(END);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    static class Consumer implements Runnable {
+        @Override
+        public void run() {
+            try {
+                while (true) {
+                    int value = QUEUE.take();
+
+                    if (value == END) {
+                        break;
+                    }
+
+                    System.out.println("消费：" + value);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    public static void main(String[] args)
+            throws InterruptedException {
+
+        Thread producer = new Thread(new Producer());
+        Thread consumer = new Thread(new Consumer());
+
+        producer.start();
+        consumer.start();
+
+        producer.join();
+        consumer.join();
+
+        System.out.println("执行结束");
+    }
+}
+```
 
