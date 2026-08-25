@@ -4,7 +4,7 @@ layout: home
 hero:
   name: "面试与项目"
   text: "Java 八股、项目复盘与刷题记录"
-  tagline: "Java、JUC、JVM、MySQL、Redis、ElasticSearch、消息队列、Spring、微服务、操作系统、计算机网络、设计模式、AI、ReAct、Transformer、LeetCode、项目面经"
+  tagline: "Java、JUC、JVM、MySQL、Redis、ElasticSearch、消息队列、Spring、微服务、操作系统、计算机网络、设计模式、AI、ReAct、Transformer、LeetCode、项目面经、公司面试记录"
   actions:
     - theme: brand
       text: Java 基础
@@ -88,5 +88,13 @@ features:
   - title: 优秀文章借鉴
     details: 缓存一致性、Agent 学习资料与后端架构书单整理。
     link: /work/优秀文章借鉴
+    linkText: 进入
+  - title: 小红书 Java 后端一面
+    details: 小红书 Java 后端一面面试问题与复盘记录。
+    link: /work/小红书Java后端一面
+    linkText: 进入
+  - title: 喜马拉雅 Java 后端一面
+    details: 喜马拉雅 Java 后端一面面试问题与复盘记录。
+    link: /work/喜马拉雅Java后端一面
     linkText: 进入
 ---
