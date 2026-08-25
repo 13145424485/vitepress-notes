@@ -20,7 +20,14 @@ export default defineConfig({
       { text: '面试',
         items: [
           { text: '面试', link: '/work/' },
-          { text: '项目面经', link: '/work/项目面经' }
+          { text: '项目面经', link: '/work/项目面经' },
+          {
+            text: '实景面试',
+            items: [
+              { text: '小红书 Java 后端一面', link: '/work/小红书Java后端一面' },
+              { text: '喜马拉雅 Java 后端一面', link: '/work/喜马拉雅Java后端一面' }
+            ]
+          }
         ],
        },
       { text: '通信', 
